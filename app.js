@@ -426,6 +426,8 @@ fileInput.addEventListener('change', async (e) => {
             [uploadType === 'cover' ? 'coverUrl' : 'avatarUrl']: url
         });
         
+        alert('تم رفع الصورة!');
+        
     } catch (err) {
         alert('خطأ في الرفع: ' + err.message);
     }
