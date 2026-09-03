@@ -29,7 +29,6 @@ function joinChat() {
     loginScreen.style.display = 'none';
     chatScreen.style.display = 'flex';
     
-    loadMessages();
     listenForMessages();
 }
 
@@ -49,39 +48,35 @@ async function sendMessage() {
     }
 }
 
-async function loadMessages() {
-    try {
-        const snapshot = await db.collection('messages')
-            .orderBy('created_at', 'asc')
-            .limit(100)
-            .get();
-        
-        messagesDiv.innerHTML = '';
-        snapshot.forEach(doc => {
-            addMessageToScreen(doc.data());
-        });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    } catch (err) {
-        console.error('خطأ:', err);
-    }
-}
-
 function listenForMessages() {
     db.collection('messages')
         .orderBy('created_at', 'asc')
-        .limitToLast(1)
+        .limitToLast(50)
         .onSnapshot((snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
-                    addMessageToScreen(change.doc.data());
+                    const msgData = change.doc.data();
+                    const existingMessages = document.querySelectorAll('.message');
+                    let exists = false;
+                    
+                    existingMessages.forEach(el => {
+                        if (el.dataset.id === change.doc.id) {
+                            exists = true;
+                        }
+                    });
+                    
+                    if (!exists) {
+                        addMessageToScreen(msgData, change.doc.id);
+                    }
                 }
             });
         });
 }
 
-function addMessageToScreen(msg) {
+function addMessageToScreen(msg, id) {
     const div = document.createElement('div');
     div.className = 'message';
+    if (id) div.dataset.id = id;
     
     const time = msg.created_at ? new Date(msg.created_at.seconds * 1000).toLocaleTimeString('ar') : '';
     
@@ -105,4 +100,5 @@ function leaveChat() {
     currentUser = '';
     chatScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
+    messagesDiv.innerHTML = '';
 }
