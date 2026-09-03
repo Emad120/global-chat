@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الشات العالمي - غرف ورتب وصوت</title>
   <link rel="stylesheet" href="style.css">
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/peerjs/peerjs.min.js"></script>
+  <!-- جلب المكتبات عبر CDN لضمان الاستقرار -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
   <div class="app">
+    <!-- الشريط الجانبي -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <h2>الغرف</h2>
@@ -23,6 +25,7 @@
       </div>
     </aside>
 
+    <!-- منطقة الشات الرئيسية -->
     <main class="main">
       <div class="room-header">
         <h1 id="current-room-name">الغرفة العامة</h1>
@@ -43,6 +46,7 @@
     </main>
   </div>
 
+  <!-- نافذة تسجيل الدخول -->
   <div id="login-modal" class="modal">
     <div class="modal-content">
       <h2>الانضمام إلى الشات</h2>
