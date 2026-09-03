@@ -147,17 +147,13 @@
                 <p class="profile-bio" id="profile-bio" contenteditable="true">اضغط لكتابة تعريف رمزي...</p>
             </div>
             
-            <div class="profile-urls">
-                <div class="input-group">
-                    <label>🔗 رابط صورة الغلاف</label>
-                    <input type="text" id="cover-url" placeholder="https://...">
-                    <button class="btn-apply" onclick="applyCoverUrl()">تطبيق</button>
+            <div class="profile-background">
+                <label>🖼️ خلفية البروفايل الكاملة</label>
+                <div class="bg-actions">
+                    <button class="btn-camera" onclick="uploadBackground()">📷</button>
+                    <button class="btn-remove" onclick="removeBackground()">✕</button>
                 </div>
-                <div class="input-group">
-                    <label>🔗 رابط الصورة الشخصية</label>
-                    <input type="text" id="avatar-url" placeholder="https://...">
-                    <button class="btn-apply" onclick="applyAvatarUrl()">تطبيق</button>
-                </div>
+                <img id="bg-img" style="display:none" alt="الخلفية">
             </div>
             
             <div class="profile-actions">
@@ -202,4 +198,4 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
 </body>
-</html>
+</html>ح
