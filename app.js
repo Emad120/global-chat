@@ -1,122 +1,95 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyAGbS9KHTdS_t2TEfaemKEWvXCmSQBZgio",
+  authDomain: "qamar-chat-811a5.firebaseapp.com",
+  projectId: "qamar-chat-811a5",
+  storageBucket: "qamar-chat-811a5.firebasestorage.app",
+  messagingSenderId: "469638501074",
+  appId: "1:469638501074:web:fc0f049efe35dc914e930b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 let currentUser = '';
-let currentRoom = 'general';
 
 const loginScreen = document.getElementById('login-screen');
 const chatScreen = document.getElementById('chat-screen');
 const usernameInput = document.getElementById('username-input');
-const roomSelect = document.getElementById('room-select');
-const roomName = document.getElementById('room-name');
 const messagesDiv = document.getElementById('messages');
 const messageInput = document.getElementById('message-input');
 
-async function joinChat() {
+function joinChat() {
     const username = usernameInput.value.trim();
-    const room = roomSelect.value;
-    
     if (!username) {
         alert('اكتب اسمك أولاً');
         return;
     }
     
     currentUser = username;
-    currentRoom = room;
-    roomName.textContent = room === 'general' ? 'الروم العام' : 'روم ' + room;
-    
     loginScreen.style.display = 'none';
     chatScreen.style.display = 'flex';
     
-    await loadMessages();
-    subscribeToMessages();
+    loadMessages();
+    listenForMessages();
 }
 
 async function sendMessage() {
     const text = messageInput.value.trim();
-    
-    if (!text || !currentUser) {
-        return;
-    }
+    if (!text || !currentUser) return;
     
     try {
-        const { data, error } = await supabase
-            .from('message')
-            .insert([{ 
-                username: currentUser, 
-                message: text 
-            }])
-            .select();
-        
-        if (error) {
-            alert('خطأ في الإرسال: ' + error.message);
-        } else {
-            messageInput.value = '';
-            if (data && data[0]) {
-                addMessageToScreen(data[0]);
-            }
-        }
+        await db.collection('messages').add({
+            username: currentUser,
+            message: text,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        messageInput.value = '';
     } catch (err) {
-        alert('فشل الاتصال: ' + err.message);
+        alert('خطأ: ' + err.message);
     }
 }
 
 async function loadMessages() {
     try {
-        const { data, error } = await supabase
-            .from('message')
-            .select('*')
-            .order('id', { ascending: true })
-            .limit(100);
+        const snapshot = await db.collection('messages')
+            .orderBy('created_at', 'asc')
+            .limit(100)
+            .get();
         
-        if (error) {
-            console.error('خطأ:', error);
-            return;
-        }
-        
-        if (data && data.length > 0) {
-            messagesDiv.innerHTML = '';
-            data.forEach(msg => addMessageToScreen(msg));
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+        messagesDiv.innerHTML = '';
+        snapshot.forEach(doc => {
+            addMessageToScreen(doc.data());
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     } catch (err) {
-        console.error('فشل:', err);
+        console.error('خطأ:', err);
     }
 }
 
-function subscribeToMessages() {
-    try {
-        supabase
-            .channel('public:message')
-            .on('postgres_changes', 
-                { event: 'INSERT', schema: 'public', table: 'message' }, 
-                (payload) => {
-                    addMessageToScreen(payload.new);
+function listenForMessages() {
+    db.collection('messages')
+        .orderBy('created_at', 'asc')
+        .limitToLast(1)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    addMessageToScreen(change.doc.data());
                 }
-            )
-            .subscribe();
-    } catch (err) {
-        console.error('اشتراك:', err);
-    }
+            });
+        });
 }
 
 function addMessageToScreen(msg) {
     const div = document.createElement('div');
+    div.className = 'message';
     
-    if (msg.username === 'النظام') {
-        div.className = 'message';
-        div.style.borderRight = '3px solid #4ade80';
-        div.style.background = 'rgba(74, 222, 128, 0.1)';
-        div.innerHTML = `
-            <div class="username" style="color: #4ade80;">${msg.username}</div>
-            <div class="text">${msg.message}</div>
-            <div class="time">${msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ar') : ''}</div>
-        `;
-    } else {
-        div.className = 'message';
-        div.innerHTML = `
-            <div class="username">${msg.username}</div>
-            <div class="text">${msg.message}</div>
-            <div class="time">${msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ar') : ''}</div>
-        `;
-    }
+    const time = msg.created_at ? new Date(msg.created_at.seconds * 1000).toLocaleTimeString('ar') : '';
+    
+    div.innerHTML = `
+        <div class="username">${msg.username}</div>
+        <div class="text">${msg.message}</div>
+        <div class="time">${time}</div>
+    `;
     
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -128,7 +101,7 @@ messageInput.addEventListener('keypress', (e) => {
     }
 });
 
-async function leaveChat() {
+function leaveChat() {
     currentUser = '';
     chatScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
