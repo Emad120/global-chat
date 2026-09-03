@@ -147,6 +147,19 @@
                 <p class="profile-bio" id="profile-bio" contenteditable="true">اضغط لكتابة تعريف رمزي...</p>
             </div>
             
+            <div class="profile-urls">
+                <div class="input-group">
+                    <label>🔗 رابط صورة الغلاف</label>
+                    <input type="text" id="cover-url" placeholder="https://...">
+                    <button class="btn-apply" onclick="applyCoverUrl()">تطبيق</button>
+                </div>
+                <div class="input-group">
+                    <label>🔗 رابط الصورة الشخصية</label>
+                    <input type="text" id="avatar-url" placeholder="https://...">
+                    <button class="btn-apply" onclick="applyAvatarUrl()">تطبيق</button>
+                </div>
+            </div>
+            
             <div class="profile-actions">
                 <button class="btn-secondary" onclick="saveProfile()">💾 حفظ</button>
                 <button class="btn-danger" onclick="logout()">🚪 خروج</button>
@@ -187,7 +200,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
