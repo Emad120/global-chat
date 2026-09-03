@@ -1,35 +1,70 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+const socketIo = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*", // للسماح بالاتصال من أي مكان بدون مشاكل CORS
-  }
-});
+const io = socketIo(server);
 
-// خدمة الملفات الثابتة (index.html, client.js, style.css)
-app.use(express.static(path.join(__dirname)));
+app.use(express.static('.'));
 
-// إعداد الاتصال عبر Socket.io
+const rooms = new Map();
+const users = new Map();
+
 io.on('connection', (socket) => {
-  console.log('مستخدم جديد اتصل بالدردشة:', socket.id);
+    console.log('مستخدم دخل:', socket.id);
 
-  // استقبال الرسائل وإعادة إرسالها للجميع
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
-  });
+    socket.on('join', (data) => {
+        const { username, room } = data;
+        socket.join(room);
+        
+        if (!rooms.has(room)) {
+            rooms.set(room, new Set());
+        }
+        rooms.get(room).add(socket.id);
+        
+        users.set(socket.id, { username, room });
+        
+        socket.to(room).emit('message', {
+            username: 'النظام',
+            text: `${username} انضم للغرفة`,
+            time: new Date().toLocaleTimeString('ar')
+        });
+        
+        socket.emit('joined', { room, username });
+        
+        const roomUsers = Array.from(rooms.get(room)).map(id => users.get(id)?.username);
+        io.to(room).emit('users', roomUsers);
+    });
 
-  socket.on('disconnect', () => {
-    console.log('مستخدم غادر الدردشة:', socket.id);
-  });
+    socket.on('chat', (data) => {
+        const user = users.get(socket.id);
+        if (user) {
+            io.to(user.room).emit('message', {
+                username: user.username,
+                text: data.text,
+                time: new Date().toLocaleTimeString('ar')
+            });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        const user = users.get(socket.id);
+        if (user && rooms.has(user.room)) {
+            rooms.get(user.room).delete(socket.id);
+            socket.to(user.room).emit('message', {
+                username: 'النظام',
+                text: `${user.username} غادر الغرفة`,
+                time: new Date().toLocaleTimeString('ar')
+            });
+            const roomUsers = Array.from(rooms.get(user.room)).map(id => users.get(id)?.username);
+            io.to(user.room).emit('users', roomUsers);
+        }
+        users.delete(socket.id);
+    });
 });
 
-// تحديد المنفذ الممرر من Render تلقائياً والاستماع على 0.0.0.0
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`الشات شغال على ${PORT}`);
 });
