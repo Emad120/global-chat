@@ -49,7 +49,9 @@ async function sendMessage() {
             alert('خطأ في الإرسال: ' + error.message);
         } else {
             messageInput.value = '';
-            addMessageToScreen(data[0]);
+            if (data && data[0]) {
+                addMessageToScreen(data[0]);
+            }
         }
     } catch (err) {
         alert('فشل الاتصال: ' + err.message);
