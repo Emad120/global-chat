@@ -11,6 +11,10 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+const OWNER_EMAIL = 'emadhlaweh@gmail.com';
+const OWNER_USERNAME = 'Emad';
+const OWNER_PASSWORD = '1208804500';
+
 let currentUser = null;
 let currentUserData = null;
 
@@ -26,6 +30,12 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tab).style.display = 'flex';
     event.target.classList.add('active');
+}
+
+function isOwner() {
+    if (!currentUserData) return false;
+    return currentUserData.email === OWNER_EMAIL && 
+           currentUserData.username === OWNER_USERNAME;
 }
 
 async function registerUser() {
@@ -49,12 +59,20 @@ async function registerUser() {
         return;
     }
     
+    if (email === OWNER_EMAIL && password !== OWNER_PASSWORD) {
+        alert('كلمة السر غير صحيحة للمالك');
+        return;
+    }
+    
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        
+        const role = (email === OWNER_EMAIL && username === OWNER_USERNAME) ? 'King' : 'Guest';
+        
         await db.collection('users').doc(userCredential.user.uid).set({
             username: username,
             email: email,
-            role: 'Guest',
+            role: role,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -127,7 +145,8 @@ async function guestLogin() {
         age: age,
         gender: gender,
         role: 'Guest',
-        isGuest: true
+        isGuest: true,
+        email: null
     };
     
     enterChat();
@@ -146,7 +165,9 @@ function enterChat() {
     loginScreen.style.display = 'none';
     chatScreen.style.display = 'flex';
     
-    if (currentUserData && currentUserData.username === 'Emad') {
+    memoryBtn.style.display = 'none';
+    
+    if (isOwner()) {
         memoryBtn.style.display = 'block';
     }
     
@@ -168,6 +189,7 @@ async function sendMessage() {
             username: currentUserData.username,
             message: text,
             uid: currentUser,
+            role: currentUserData.role || 'Guest',
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         messageInput.value = '';
@@ -213,8 +235,13 @@ function addMessageToScreen(msg, id) {
         div.style.background = 'rgba(74, 222, 128, 0.1)';
     }
     
+    if (msg.role === 'King') {
+        div.style.borderRight = '3px solid #ffd700';
+        div.style.background = 'rgba(255, 215, 0, 0.1)';
+    }
+    
     div.innerHTML = `
-        <div class="username">${msg.username}</div>
+        <div class="username">${msg.username} ${msg.role === 'King' ? '👑' : ''}</div>
         <div class="text">${msg.message}</div>
         <div class="time">${time}</div>
     `;
