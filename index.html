@@ -11,7 +11,6 @@
     <div class="background-pattern"></div>
     
     <div class="container">
-        <!-- شاشة الدخول -->
         <div class="login-screen" id="login-screen">
             <div class="login-box">
                 <div class="logo">
@@ -88,7 +87,6 @@
             </div>
         </div>
         
-        <!-- شاشة الشات -->
         <div class="chat-screen" id="chat-screen" style="display:none">
             <div class="header">
                 <button class="btn-icon" onclick="toggleRooms(event)">📂</button>
@@ -124,7 +122,6 @@
         </div>
     </div>
 
-    <!-- نافذة البروفايل -->
     <div class="profile-overlay" id="profile-overlay">
         <div class="profile-box">
             <button class="btn-close" onclick="closeProfile()">✕</button>
@@ -132,7 +129,7 @@
             <div class="profile-cover" id="profile-cover">
                 <img id="cover-img" style="display:none" alt="الغلاف">
                 <button class="btn-camera" onclick="uploadCover()">📷</button>
-                <button class="btn-remove" onclick="removeCover()">🧺</button>
+                <button class="btn-remove" onclick="removeCover()">✕</button>
             </div>
             
             <div class="profile-avatar-container">
@@ -141,7 +138,7 @@
                     <span id="avatar-letter"></span>
                 </div>
                 <button class="btn-camera" onclick="uploadAvatar()">📷</button>
-                <button class="btn-remove" onclick="removeAvatar()">🧺</button>
+                <button class="btn-remove" onclick="removeAvatar()">✕</button>
             </div>
             
             <div class="profile-info">
@@ -157,7 +154,6 @@
         </div>
     </div>
 
-    <!-- القائمة اليسار -->
     <div class="sidebar left-sidebar" id="left-sidebar">
         <div class="sidebar-header">
             <h3>القائمة</h3>
@@ -173,7 +169,6 @@
         </div>
     </div>
 
-    <!-- القائمة اليمين -->
     <div class="sidebar right-sidebar" id="right-sidebar">
         <div class="sidebar-header">
             <h3>الرومات</h3>
