@@ -24,6 +24,8 @@ const messagesDiv = document.getElementById('messages');
 const messageInput = document.getElementById('message-input');
 const roomTitle = document.getElementById('room-title');
 const memoryBtn = document.getElementById('memory-btn');
+const memorySidebarItem = document.getElementById('memory-sidebar-item');
+const privateRoomItem = document.getElementById('private-room-item');
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -166,9 +168,13 @@ function enterChat() {
     chatScreen.style.display = 'flex';
     
     memoryBtn.style.display = 'none';
+    memorySidebarItem.style.display = 'none';
+    privateRoomItem.style.display = 'none';
     
     if (isOwner()) {
-        memoryBtn.style.display = 'block';
+        memoryBtn.style.display = 'flex';
+        memorySidebarItem.style.display = 'block';
+        privateRoomItem.style.display = 'block';
     }
     
     listenForMessages();
@@ -267,23 +273,58 @@ function toggleMics() {
     }
 }
 
-function toggleRooms() {
-    alert('قائمة الرومات - قريباً');
+function toggleMenu(event) {
+    event.stopPropagation();
+    openSidebar('left-sidebar');
 }
 
-function toggleNotifications() {
+function toggleRooms(event) {
+    event.stopPropagation();
+    openSidebar('right-sidebar');
+}
+
+function openSidebar(id) {
+    closeAllSidebars();
+    document.getElementById(id).classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+}
+
+function closeSidebar(id) {
+    document.getElementById(id).classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+}
+
+function closeAllSidebars() {
+    document.querySelectorAll('.sidebar').forEach(el => el.classList.remove('open'));
+    document.getElementById('overlay').classList.remove('show');
+}
+
+function showAlert(msg) {
+    closeAllSidebars();
+    alert(msg);
+}
+
+function toggleNotifications(event) {
+    event.stopPropagation();
+    closeAllSidebars();
     alert('الإشعارات - قريباً');
 }
 
-function togglePrivate() {
+function togglePrivate(event) {
+    event.stopPropagation();
+    closeAllSidebars();
     alert('الرسائل الخاصة - قريباً');
 }
 
-function toggleMemory() {
+function toggleMemory(event) {
+    event.stopPropagation();
+    closeAllSidebars();
     alert('الذاكرة - قريباً');
 }
 
-function toggleProfile() {
+function toggleProfile(event) {
+    event.stopPropagation();
+    closeAllSidebars();
     alert('البروفايل - قريباً');
 }
 
