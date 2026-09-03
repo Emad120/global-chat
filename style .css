@@ -1,63 +1,139 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الشات العالمي - غرف ورتب وصوت</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- جلب المكتبات عبر CDN لضمان الاستقرار -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-</head>
-<body>
-  <div class="app">
-    <!-- الشريط الجانبي -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>الغرف</h2>
-        <button id="create-room-btn" class="btn btn-small">+ غرفة جديدة</button>
-      </div>
-      <div id="rooms-list" class="rooms-list"></div>
-      
-      <div class="sidebar-section">
-        <h3>المستخدمون في الغرفة</h3>
-        <div id="users-list" class="users-list"></div>
-      </div>
-    </aside>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    <!-- منطقة الشات الرئيسية -->
-    <main class="main">
-      <div class="room-header">
-        <h1 id="current-room-name">الغرفة العامة</h1>
-        <div class="user-info">
-          <span id="username-display"></span>
-          <span id="role-badge" class="role-badge"></span>
-          <button id="voice-toggle" class="btn btn-small">🎤 تفعيل الصوت</button>
-          <button id="leave-room-btn" class="btn btn-small btn-danger">مغادرة</button>
-        </div>
-      </div>
+body {
+  background-color: #0f172a;
+  color: #f8fafc;
+  direction: rtl;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 15px;
+}
 
-      <div id="messages" class="messages"></div>
+.container {
+  width: 100%;
+  max-width: 480px;
+  background: #1e293b;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-      <div class="message-input">
-        <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." />
-        <button id="send-btn" class="btn">إرسال</button>
-      </div>
-    </main>
-  </div>
+h1, h2, h3 {
+  text-align: center;
+  color: #38bdf8;
+  font-weight: 600;
+}
 
-  <!-- نافذة تسجيل الدخول -->
-  <div id="login-modal" class="modal">
-    <div class="modal-content">
-      <h2>الانضمام إلى الشات</h2>
-      <input type="text" id="username-input" placeholder="اسم المستخدم" />
-      <select id="room-select">
-        <option value="general">الغرفة العامة</option>
-      </select>
-      <button id="join-btn" class="btn">انضمام</button>
-    </div>
-  </div>
+/* تنسيق النوافذ ومدخلات البيانات */
+input[type="text"], select {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s ease;
+}
 
-  <script src="client.js"></script>
-</body>
-</html>
+input[type="text"]:focus, select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+/* الأزرار */
+button {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #0369a1, #1d4ed8);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* أزرار فرعية أو مغادرة */
+.btn-secondary {
+  background: #475569;
+}
+
+.btn-secondary:hover {
+  background: #334155;
+}
+
+/* منطقة الرسائل والمحادثة */
+#chat-messages, .messages-box {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  height: 320px;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  background-color: #1e293b;
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 85%;
+  word-wrap: break-word;
+  line-height: 1.4;
+  border-right: 3px solid #38bdf8;
+}
+
+/* نموذج إرسال الرسالة */
+.chat-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-group input {
+  flex: 1;
+}
+
+/* القوائم والغرف */
+.controls-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* تحسين المظهر على الشاشات الصغيرة */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+  
+  button {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
