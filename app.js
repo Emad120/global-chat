@@ -14,7 +14,7 @@ async function joinChat() {
     const room = roomSelect.value;
     
     if (!username) {
-        alert('⚠️ اكتب اسمك أولاً');
+        alert('اكتب اسمك أولاً');
         return;
     }
     
@@ -27,46 +27,72 @@ async function joinChat() {
     
     await loadMessages();
     subscribeToMessages();
-    
-    await supabase
-        .from('message')
-        .insert([{ username: 'النظام', message: `🌟 ${username} دخل إلى الغرفة` }]);
 }
 
 async function sendMessage() {
     const text = messageInput.value.trim();
-    if (text && currentUser) {
-        await supabase
+    
+    if (!text || !currentUser) {
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabase
             .from('message')
-            .insert([{ username: currentUser, message: text }]);
-        messageInput.value = '';
+            .insert([{ 
+                username: currentUser, 
+                message: text 
+            }])
+            .select();
+        
+        if (error) {
+            alert('خطأ في الإرسال: ' + error.message);
+        } else {
+            messageInput.value = '';
+            addMessageToScreen(data[0]);
+        }
+    } catch (err) {
+        alert('فشل الاتصال: ' + err.message);
     }
 }
 
 async function loadMessages() {
-    const { data, error } = await supabase
-        .from('message')
-        .select('*')
-        .order('id', { ascending: true })
-        .limit(100);
-    
-    if (data) {
-        messagesDiv.innerHTML = '';
-        data.forEach(msg => addMessageToScreen(msg));
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    try {
+        const { data, error } = await supabase
+            .from('message')
+            .select('*')
+            .order('id', { ascending: true })
+            .limit(100);
+        
+        if (error) {
+            console.error('خطأ:', error);
+            return;
+        }
+        
+        if (data && data.length > 0) {
+            messagesDiv.innerHTML = '';
+            data.forEach(msg => addMessageToScreen(msg));
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    } catch (err) {
+        console.error('فشل:', err);
     }
 }
 
 function subscribeToMessages() {
-    supabase
-        .channel('public:message')
-        .on('postgres_changes', 
-            { event: 'INSERT', schema: 'public', table: 'message' }, 
-            (payload) => {
-                addMessageToScreen(payload.new);
-            }
-        )
-        .subscribe();
+    try {
+        supabase
+            .channel('public:message')
+            .on('postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'message' }, 
+                (payload) => {
+                    addMessageToScreen(payload.new);
+                }
+            )
+            .subscribe();
+    } catch (err) {
+        console.error('اشتراك:', err);
+    }
 }
 
 function addMessageToScreen(msg) {
@@ -79,14 +105,14 @@ function addMessageToScreen(msg) {
         div.innerHTML = `
             <div class="username" style="color: #4ade80;">${msg.username}</div>
             <div class="text">${msg.message}</div>
-            <div class="time">${new Date(msg.created_at).toLocaleTimeString('ar')}</div>
+            <div class="time">${msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ar') : ''}</div>
         `;
     } else {
         div.className = 'message';
         div.innerHTML = `
             <div class="username">${msg.username}</div>
             <div class="text">${msg.message}</div>
-            <div class="time">${new Date(msg.created_at).toLocaleTimeString('ar')}</div>
+            <div class="time">${msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ar') : ''}</div>
         `;
     }
     
@@ -101,12 +127,6 @@ messageInput.addEventListener('keypress', (e) => {
 });
 
 async function leaveChat() {
-    if (currentUser) {
-        await supabase
-            .from('message')
-            .insert([{ username: 'النظام', message: `👋 ${currentUser} غادر الغرفة` }]);
-    }
-    
     currentUser = '';
     chatScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
