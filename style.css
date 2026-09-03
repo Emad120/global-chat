@@ -1,37 +1,330 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+body {
+    font-family: 'Cairo', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
 
-app.use(express.static('public'));
+.background-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.08) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    z-index: 0;
+}
 
-io.on('connection', (socket) => {
-    console.log('مستخدم دخل:', socket.id);
-    
-    socket.on('join', (data) => {
-        const { username, room } = data;
-        socket.join(room);
-        socket.to(room).emit('message', {
-            username: 'النظام',
-            text: `${username} انضم للغرفة`,
-            time: new Date().toLocaleTimeString('ar')
-        });
-        socket.emit('joined', { room, username });
-    });
-    
-    socket.on('chat', (data) => {
-        io.to(data.room).emit('message', {
-            username: data.username,
-            text: data.text,
-            time: new Date().toLocaleTimeString('ar')
-        });
-    });
-});
+.container {
+    width: 100%;
+    max-width: 900px;
+    height: 98vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 
+        0 0 50px rgba(212, 175, 55, 0.1),
+        inset 0 0 50px rgba(212, 175, 55, 0.02);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    position: relative;
+    z-index: 1;
+}
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`الشات شغال على ${PORT}`);
-});
+.login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.login-box {
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+    padding: 50px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.logo { text-align: center; }
+
+.logo-icon {
+    font-size: 70px;
+    animation: glow 3s infinite;
+}
+
+@keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)); }
+    50% { filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.8)); }
+}
+
+.logo h1 {
+    font-size: 36px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 10px;
+}
+
+.logo p {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #d4af37;
+}
+
+.input-group input,
+.input-group select {
+    padding: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 16px;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.btn-primary {
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Cairo', sans-serif;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+}
+
+.chat-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.room-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.room-avatar {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #d4af37 0%, #8b6914 100%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+}
+
+.room-info h3 {
+    font-weight: 700;
+    color: #d4af37;
+}
+
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #4ade80;
+}
+
+.online-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.btn-leave {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.8);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-leave:hover {
+    background: rgba(220, 38, 38, 1);
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.messages {
+    flex: 1;
+    padding: 25px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 15px;
+    max-width: 70%;
+    align-self: flex-start;
+    animation: messageIn 0.3s ease-out;
+    border-right: 3px solid #d4af37;
+}
+
+@keyframes messageIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.message .username {
+    color: #d4af37;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.message .text {
+    font-size: 16px;
+    word-wrap: break-word;
+}
+
+.message .time {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.input-area {
+    display: flex;
+    padding: 20px;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.input-area input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 16px;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s;
+}
+
+.input-area input:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.btn-send {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Cairo', sans-serif;
+}
+
+.btn-send:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+}
+
+@media (max-width: 768px) {
+    .container {
+        height: 100vh;
+        border-radius: 0;
+        max-width: 100%;
+    }
+    .message {
+        max-width: 85%;
+    }
+    .login-box {
+        padding: 30px;
+    }
+}
