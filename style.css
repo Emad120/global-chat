@@ -419,3 +419,170 @@ body {
 .overlay.show {
     display: block;
 }
+
+.profile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 20;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-overlay.show {
+    display: flex;
+}
+
+.profile-box {
+    width: 90%;
+    max-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    position: relative;
+}
+
+.profile-box > .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+}
+
+.profile-cover {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, #d4af37 0%, #8b6914 100%);
+    position: relative;
+}
+
+.profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar-container {
+    display: flex;
+    justify-content: center;
+    margin-top: -40px;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #d4af37;
+    background: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar span {
+    font-size: 30px;
+    font-weight: 900;
+    color: #d4af37;
+}
+
+.btn-camera {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #d4af37;
+    color: #000;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-remove {
+    position: absolute;
+    bottom: 0;
+    left: calc(50% - 40px);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.profile-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.profile-info h2 {
+    color: #d4af37;
+    font-size: 20px;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 12px;
+    background: #d4af37;
+    color: #000;
+    font-size: 12px;
+    margin: 8px 0;
+}
+
+.profile-bio {
+    color: #aaa;
+    font-size: 13px;
+    min-height: 30px;
+    border: 1px dashed rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+}
+
+.btn-secondary {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #d4af37;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+}
+
+.btn-danger {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #dc2626;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+}ح
