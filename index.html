@@ -4,7 +4,116 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الدردشة العامة</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      direction: rtl;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 15px;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: #1e293b;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+    h3 {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 14px;
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: #38bdf8;
+    }
+    button {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover {
+      background: #0369a1;
+    }
+    .btn-danger {
+      background: #ef4444 !important;
+    }
+    .btn-danger:hover {
+      background: #dc2626 !important;
+    }
+    .btn-secondary {
+      background: #475569;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+    .controls-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .messages-box {
+      background-color: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      height: 300px;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .message {
+      background-color: #1e293b;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+      border-right: 3px solid #38bdf8;
+      font-size: 14px;
+    }
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input-group input {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
 
@@ -12,32 +121,30 @@
     <h1>الدردشة العامة</h1>
 
     <!-- قسم الانضمام -->
-    <div id="login-section">
+    <div>
       <h3>الانضمام إلى الشات</h3>
       <div class="controls-group">
-        <input type="text" id="username" placeholder="وين الحكي (اسم المستخدم)">
+        <input type="text" id="username" placeholder="اسم المستخدم...">
         <select id="room-select">
-          <option value="الفرقة العامة">الغرفة العامة</option>
+          <option value="الغرفة العامة">الغرفة العامة</option>
         </select>
         <button id="join-btn">انضمام</button>
       </div>
     </div>
 
-    <hr style="border-color: #334155; margin: 10px 0;">
-
-    <!-- قسم الغرف والصوت -->
+    <!-- أزرار التحكم -->
     <div class="controls-group">
-      <button class="btn-secondary">+ غرفة جديدة</button>
-      <button class="btn-secondary">🎤 تفعيل الصوت</button>
-      <button class="btn-secondary" style="background: #ef4444;">مغادرة</button>
+      <button class="btn-secondary">+ غرفة</button>
+      <button class="btn-secondary">🎤 صوت</button>
+      <button class="btn-danger">مغادرة</button>
     </div>
 
-    <!-- منطقة عرض الرسائل -->
+    <!-- عرض الرسائل -->
     <div id="chat-messages" class="messages-box">
       <div class="message">أهلاً بك في الدردشة! اكتب رسالتك بالأسفل.</div>
     </div>
 
-    <!-- كتابة وإرسال الرسائل -->
+    <!-- إرسال رسالة -->
     <div class="chat-input-group">
       <input type="text" id="message-input" placeholder="وين الحديث...">
       <button id="send-btn">إرسال</button>
