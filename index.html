@@ -26,7 +26,6 @@
                     <button class="tab-btn" onclick="switchTab('guest')">زائر</button>
                 </div>
                 
-                <!-- تبويب الدخول -->
                 <div class="tab-content" id="tab-login">
                     <div class="input-group">
                         <label>👤 الاسم أو الإيميل</label>
@@ -42,7 +41,6 @@
                     </button>
                 </div>
                 
-                <!-- تبويب التسجيل -->
                 <div class="tab-content" id="tab-register" style="display:none">
                     <div class="input-group">
                         <label>👤 الاسم</label>
@@ -66,7 +64,6 @@
                     </button>
                 </div>
                 
-                <!-- تبويب الزائر -->
                 <div class="tab-content" id="tab-guest" style="display:none">
                     <div class="input-group">
                         <label>👤 الاسم</label>
@@ -94,18 +91,15 @@
         <!-- شاشة الشات -->
         <div class="chat-screen" id="chat-screen" style="display:none">
             <div class="header">
-                <button class="btn-icon" onclick="toggleRooms()">📂</button>
+                <button class="btn-icon" onclick="toggleRooms(event)">📂</button>
                 <h3 id="room-title">🌙 قمر الشام - الروم العام</h3>
                 <div class="header-actions">
-                    <button class="btn-icon" onclick="toggleNotifications()">🔔</button>
-                    <button class="btn-icon" onclick="togglePrivate()">💬</button>
-                    <button class="btn-icon" id="memory-btn" style="display:none" onclick="toggleMemory()">🧠</button>
-                    <button class="btn-icon" onclick="toggleProfile()">👤</button>
+                    <button class="btn-icon" onclick="toggleNotifications(event)">🔔</button>
+                    <button class="btn-icon" onclick="togglePrivate(event)">💬</button>
+                    <button class="btn-icon" id="memory-btn" style="display:none" onclick="toggleMemory(event)">🧠</button>
+                    <button class="btn-icon" onclick="toggleProfile(event)">👤</button>
+                    <button class="btn-icon" onclick="toggleMenu(event)">☰</button>
                 </div>
-            </div>
-            
-            <div class="main-content">
-                <div class="messages" id="messages"></div>
             </div>
             
             <div class="mics-bar" id="mics-bar">
@@ -118,6 +112,10 @@
                 <button class="btn-icon" onclick="toggleMics()">▼</button>
             </div>
             
+            <div class="main-content">
+                <div class="messages" id="messages"></div>
+            </div>
+            
             <div class="input-area">
                 <button class="btn-icon" onclick="copyRoomLink()">🔗</button>
                 <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
@@ -125,6 +123,36 @@
             </div>
         </div>
     </div>
+
+    <!-- القائمة اليسار -->
+    <div class="sidebar left-sidebar" id="left-sidebar">
+        <div class="sidebar-header">
+            <h3>القائمة</h3>
+            <button class="btn-close" onclick="closeSidebar('left-sidebar')">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <button class="sidebar-item" onclick="showAlert('تفاعل الرومات - قريباً')">🏠 تفاعل الرومات</button>
+            <button class="sidebar-item" onclick="showAlert('تفاعل الأعضاء - قريباً')">👥 تفاعل الأعضاء</button>
+            <button class="sidebar-item" onclick="showAlert('تفاعل العائلات - قريباً')">👨‍👩‍👧‍👦 تفاعل العائلات</button>
+            <button class="sidebar-item" id="memory-sidebar-item" style="display:none" onclick="toggleMemory(event)">🧠 ذاكرة البوت</button>
+            <button class="sidebar-item" onclick="showAlert('حائط النشر العام - قريباً')">📢 حائط نشر عام</button>
+            <button class="sidebar-item" onclick="showAlert('حائط نشر الأصدقاء - قريباً')">💬 حائط نشر الأصدقاء</button>
+        </div>
+    </div>
+
+    <!-- القائمة اليمين -->
+    <div class="sidebar right-sidebar" id="right-sidebar">
+        <div class="sidebar-header">
+            <h3>الرومات</h3>
+            <button class="btn-close" onclick="closeSidebar('right-sidebar')">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <button class="sidebar-item active" onclick="showAlert('الروم العام')">🌙 الروم العام</button>
+            <button class="sidebar-item" id="private-room-item" style="display:none" onclick="showAlert('الروم الخاص مع البوت')">🤖 الروم الخاص مع البوت</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeAllSidebars()"></div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
