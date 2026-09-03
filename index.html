@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌙 قمر الشام</title>
+    <title>🌙 قمر الشام - منصة الشات الملكية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,6 +11,7 @@
     <div class="background-pattern"></div>
     
     <div class="container">
+        <!-- شاشة الدخول -->
         <div class="login-screen" id="login-screen">
             <div class="login-box">
                 <div class="logo">
@@ -18,42 +19,115 @@
                     <h1>قمر الشام</h1>
                     <p>منصة الشات الملكية الفاخرة</p>
                 </div>
-                <div class="input-group">
-                    <label>👤 اسمك الكريم</label>
-                    <input type="text" id="username-input" placeholder="اكتب اسمك هنا..." maxlength="20">
+                
+                <div class="login-tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')">دخول</button>
+                    <button class="tab-btn" onclick="switchTab('register')">تسجيل</button>
+                    <button class="tab-btn" onclick="switchTab('guest')">زائر</button>
                 </div>
-                <button class="btn-primary" onclick="joinChat()">
-                    <span>دخول</span>
-                    <span>🚪</span>
-                </button>
+                
+                <!-- تبويب الدخول -->
+                <div class="tab-content" id="tab-login">
+                    <div class="input-group">
+                        <label>👤 الاسم أو الإيميل</label>
+                        <input type="text" id="login-username" placeholder="اكتب اسمك أو إيميلك...">
+                    </div>
+                    <div class="input-group">
+                        <label>🔑 كلمة السر</label>
+                        <input type="password" id="login-password" placeholder="كلمة السر...">
+                    </div>
+                    <button class="btn-primary" onclick="loginUser()">
+                        <span>دخول</span>
+                        <span>🚪</span>
+                    </button>
+                </div>
+                
+                <!-- تبويب التسجيل -->
+                <div class="tab-content" id="tab-register" style="display:none">
+                    <div class="input-group">
+                        <label>👤 الاسم</label>
+                        <input type="text" id="reg-username" placeholder="اسمك...">
+                    </div>
+                    <div class="input-group">
+                        <label>📧 الإيميل</label>
+                        <input type="email" id="reg-email" placeholder="example@email.com">
+                    </div>
+                    <div class="input-group">
+                        <label>🔑 كلمة السر</label>
+                        <input type="password" id="reg-password" placeholder="كلمة السر...">
+                    </div>
+                    <div class="input-group">
+                        <label>🔑 تأكيد كلمة السر</label>
+                        <input type="password" id="reg-confirm" placeholder="أعد كلمة السر...">
+                    </div>
+                    <button class="btn-primary" onclick="registerUser()">
+                        <span>تسجيل</span>
+                        <span>📝</span>
+                    </button>
+                </div>
+                
+                <!-- تبويب الزائر -->
+                <div class="tab-content" id="tab-guest" style="display:none">
+                    <div class="input-group">
+                        <label>👤 الاسم</label>
+                        <input type="text" id="guest-username" placeholder="اسمك...">
+                    </div>
+                    <div class="input-group">
+                        <label>🎂 العمر</label>
+                        <input type="number" id="guest-age" placeholder="عمرك..." min="10" max="99">
+                    </div>
+                    <div class="input-group">
+                        <label>⚧️ الجنس</label>
+                        <select id="guest-gender">
+                            <option value="male">ذكر</option>
+                            <option value="female">أنثى</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="guestLogin()">
+                        <span>دخول كزائر</span>
+                        <span>👤</span>
+                    </button>
+                </div>
             </div>
         </div>
-
+        
+        <!-- شاشة الشات -->
         <div class="chat-screen" id="chat-screen" style="display:none">
             <div class="header">
-                <div class="room-info">
-                    <div class="room-avatar">🌙</div>
-                    <div>
-                        <h3>قمر الشام</h3>
-                        <span class="online-status">
-                            <span class="online-dot"></span>
-                            <span>متصل</span>
-                        </span>
-                    </div>
+                <button class="btn-icon" onclick="toggleRooms()">📂</button>
+                <h3 id="room-title">🌙 قمر الشام - الروم العام</h3>
+                <div class="header-actions">
+                    <button class="btn-icon" onclick="toggleNotifications()">🔔</button>
+                    <button class="btn-icon" onclick="togglePrivate()">💬</button>
+                    <button class="btn-icon" id="memory-btn" style="display:none" onclick="toggleMemory()">🧠</button>
+                    <button class="btn-icon" onclick="toggleProfile()">👤</button>
                 </div>
-                <button class="btn-leave" onclick="leaveChat()">خروج</button>
             </div>
             
-            <div class="messages" id="messages"></div>
+            <div class="main-content">
+                <div class="messages" id="messages"></div>
+            </div>
+            
+            <div class="mics-bar" id="mics-bar">
+                <div class="mics">
+                    <div class="mic" id="mic1">🎙️</div>
+                    <div class="mic" id="mic2">🎙️</div>
+                    <div class="mic" id="mic3">🎙️</div>
+                    <div class="mic" id="mic4">🎙️</div>
+                </div>
+                <button class="btn-icon" onclick="toggleMics()">▼</button>
+            </div>
             
             <div class="input-area">
-                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." maxlength="500">
+                <button class="btn-icon" onclick="copyRoomLink()">🔗</button>
+                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
                 <button class="btn-send" onclick="sendMessage()">إرسال 📨</button>
             </div>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
 </body>
