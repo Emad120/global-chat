@@ -3,40 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الشات العالمي</title>
+    <title>🌙 قمر الشام - شات ملكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <div class="background-pattern"></div>
+    
     <div class="container">
         <div class="login-screen" id="login-screen">
             <div class="login-box">
-                <h2>💬 الشات العالمي</h2>
-                <input type="text" id="username-input" placeholder="اسمك" maxlength="20">
-                <input type="text" id="room-input" placeholder="اسم الغرفة" value="general">
-                <button onclick="joinRoom()">دخول</button>
+                <div class="logo">
+                    <div class="logo-icon">🌙</div>
+                    <h1>قمر الشام</h1>
+                    <p>منصة الشات الملكية الفاخرة</p>
+                </div>
+                <div class="input-group">
+                    <label>👤 اسمك الكريم</label>
+                    <input type="text" id="username-input" placeholder="اكتب اسمك هنا..." maxlength="20">
+                </div>
+                <div class="input-group">
+                    <label>🏰 الغرفة</label>
+                    <select id="room-select">
+                        <option value="general">الروم العام</option>
+                        <option value="vip">روم VIP</option>
+                        <option value="friends">روم الأصدقاء</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="joinChat()">
+                    <span>دخول</span>
+                    <span>🚪</span>
+                </button>
             </div>
         </div>
 
         <div class="chat-screen" id="chat-screen" style="display:none">
             <div class="header">
-                <h3 id="room-name"></h3>
-                <span id="user-count"></span>
+                <div class="room-info">
+                    <div class="room-avatar">🌙</div>
+                    <div>
+                        <h3 id="room-name">الروم العام</h3>
+                        <span class="online-status">
+                            <span class="online-dot"></span>
+                            <span>متصل</span>
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-leave" onclick="leaveChat()">خروج</button>
             </div>
+            
             <div class="main-content">
                 <div class="messages" id="messages"></div>
-                <div class="users-panel">
-                    <h4>المستخدمون</h4>
-                    <div id="users-list"></div>
-                </div>
             </div>
+            
             <div class="input-area">
-                <input type="text" id="message-input" placeholder="اكتب رسالتك..." maxlength="500">
-                <button onclick="sendMessage()">إرسال</button>
+                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا..." maxlength="500">
+                <button class="btn-send" onclick="sendMessage()">إرسال 📨</button>
             </div>
         </div>
     </div>
 
-    <script src="client.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
