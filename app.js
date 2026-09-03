@@ -10,6 +10,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
 const OWNER_USERNAME = 'Emad';
@@ -26,6 +27,8 @@ const roomTitle = document.getElementById('room-title');
 const memoryBtn = document.getElementById('memory-btn');
 const memorySidebarItem = document.getElementById('memory-sidebar-item');
 const privateRoomItem = document.getElementById('private-room-item');
+const profileOverlay = document.getElementById('profile-overlay');
+const fileInput = document.getElementById('file-input');
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -75,6 +78,9 @@ async function registerUser() {
             username: username,
             email: email,
             role: role,
+            bio: '',
+            coverUrl: '',
+            avatarUrl: '',
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -148,7 +154,10 @@ async function guestLogin() {
         gender: gender,
         role: 'Guest',
         isGuest: true,
-        email: null
+        email: null,
+        bio: '',
+        coverUrl: '',
+        avatarUrl: ''
     };
     
     enterChat();
@@ -196,6 +205,7 @@ async function sendMessage() {
             message: text,
             uid: currentUser,
             role: currentUserData.role || 'Guest',
+            avatarUrl: currentUserData.avatarUrl || '',
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         messageInput.value = '';
@@ -304,6 +314,148 @@ function showAlert(msg) {
     alert(msg);
 }
 
+function toggleProfile(event) {
+    event.stopPropagation();
+    closeAllSidebars();
+    openProfile();
+}
+
+function openProfile() {
+    if (!currentUserData) return;
+    
+    document.getElementById('profile-name').textContent = currentUserData.username;
+    document.getElementById('profile-role').textContent = currentUserData.role || 'Guest';
+    document.getElementById('profile-bio').textContent = currentUserData.bio || 'اضغط لكتابة تعريف رمزي...';
+    
+    const avatarImg = document.getElementById('avatar-img');
+    const avatarLetter = document.getElementById('avatar-letter');
+    
+    if (currentUserData.avatarUrl) {
+        avatarImg.src = currentUserData.avatarUrl;
+        avatarImg.style.display = 'block';
+        avatarLetter.style.display = 'none';
+    } else {
+        avatarImg.style.display = 'none';
+        avatarLetter.style.display = 'block';
+        avatarLetter.textContent = currentUserData.username.charAt(0);
+    }
+    
+    const coverImg = document.getElementById('cover-img');
+    if (currentUserData.coverUrl) {
+        coverImg.src = currentUserData.coverUrl;
+        coverImg.style.display = 'block';
+    } else {
+        coverImg.style.display = 'none';
+    }
+    
+    profileOverlay.classList.add('show');
+}
+
+function closeProfile() {
+    profileOverlay.classList.remove('show');
+}
+
+async function saveProfile() {
+    const bio = document.getElementById('profile-bio').textContent.trim();
+    
+    if (bio.length > 20) {
+        alert('التعريف الرمزي 20 حرف كحد أقصى');
+        return;
+    }
+    
+    currentUserData.bio = bio;
+    
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({
+            bio: bio
+        });
+    }
+    
+    closeProfile();
+    alert('تم الحفظ!');
+}
+
+function logout() {
+    auth.signOut();
+    currentUser = null;
+    currentUserData = null;
+    profileOverlay.classList.remove('show');
+    chatScreen.style.display = 'none';
+    loginScreen.style.display = 'flex';
+}
+
+let uploadType = '';
+
+function uploadCover() {
+    uploadType = 'cover';
+    fileInput.click();
+}
+
+function uploadAvatar() {
+    uploadType = 'avatar';
+    fileInput.click();
+}
+
+fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!currentUser || currentUserData.isGuest) {
+        alert('الزوار لا يمكنهم رفع صور');
+        return;
+    }
+    
+    try {
+        const storageRef = storage.ref();
+        const fileRef = storageRef.child(`profiles/${currentUser}/${uploadType}`);
+        await fileRef.put(file);
+        const url = await fileRef.getDownloadURL();
+        
+        if (uploadType === 'cover') {
+            currentUserData.coverUrl = url;
+            document.getElementById('cover-img').src = url;
+            document.getElementById('cover-img').style.display = 'block';
+        } else {
+            currentUserData.avatarUrl = url;
+            document.getElementById('avatar-img').src = url;
+            document.getElementById('avatar-img').style.display = 'block';
+            document.getElementById('avatar-letter').style.display = 'none';
+        }
+        
+        await db.collection('users').doc(currentUser).update({
+            [uploadType === 'cover' ? 'coverUrl' : 'avatarUrl']: url
+        });
+        
+    } catch (err) {
+        alert('خطأ في الرفع: ' + err.message);
+    }
+    
+    e.target.value = '';
+});
+
+async function removeCover() {
+    currentUserData.coverUrl = '';
+    document.getElementById('cover-img').style.display = 'none';
+    
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({
+            coverUrl: ''
+        });
+    }
+}
+
+async function removeAvatar() {
+    currentUserData.avatarUrl = '';
+    document.getElementById('avatar-img').style.display = 'none';
+    document.getElementById('avatar-letter').style.display = 'block';
+    
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({
+            avatarUrl: ''
+        });
+    }
+}
+
 function toggleNotifications(event) {
     event.stopPropagation();
     closeAllSidebars();
@@ -320,12 +472,6 @@ function toggleMemory(event) {
     event.stopPropagation();
     closeAllSidebars();
     alert('الذاكرة - قريباً');
-}
-
-function toggleProfile(event) {
-    event.stopPropagation();
-    closeAllSidebars();
-    alert('البروفايل - قريباً');
 }
 
 messageInput.addEventListener('keypress', (e) => {
