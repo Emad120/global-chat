@@ -80,6 +80,7 @@ async function registerUser() {
             bio: '',
             coverUrl: '',
             avatarUrl: '',
+            backgroundUrl: '',
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -156,7 +157,8 @@ async function guestLogin() {
         email: null,
         bio: '',
         coverUrl: '',
-        avatarUrl: ''
+        avatarUrl: '',
+        backgroundUrl: ''
     };
     
     enterChat();
@@ -324,8 +326,6 @@ function openProfile() {
     document.getElementById('profile-name').textContent = currentUserData.username;
     document.getElementById('profile-role').textContent = currentUserData.role || 'Guest';
     document.getElementById('profile-bio').textContent = currentUserData.bio || 'اضغط لكتابة تعريف رمزي...';
-    document.getElementById('cover-url').value = currentUserData.coverUrl || '';
-    document.getElementById('avatar-url').value = currentUserData.avatarUrl || '';
     
     const avatarImg = document.getElementById('avatar-img');
     const avatarLetter = document.getElementById('avatar-letter');
@@ -346,6 +346,17 @@ function openProfile() {
         coverImg.style.display = 'block';
     } else {
         coverImg.style.display = 'none';
+    }
+    
+    const bgImg = document.getElementById('bg-img');
+    if (currentUserData.backgroundUrl) {
+        bgImg.src = currentUserData.backgroundUrl;
+        bgImg.style.display = 'block';
+        document.querySelector('.profile-box').style.backgroundImage = `url(${currentUserData.backgroundUrl})`;
+        document.querySelector('.profile-box').style.backgroundSize = 'cover';
+    } else {
+        bgImg.style.display = 'none';
+        document.querySelector('.profile-box').style.backgroundImage = '';
     }
     
     profileOverlay.classList.add('show');
@@ -375,41 +386,6 @@ async function saveProfile() {
     alert('تم الحفظ!');
 }
 
-async function applyCoverUrl() {
-    const url = document.getElementById('cover-url').value.trim();
-    if (!url) return;
-    
-    currentUserData.coverUrl = url;
-    document.getElementById('cover-img').src = url;
-    document.getElementById('cover-img').style.display = 'block';
-    
-    if (currentUser && !currentUserData.isGuest) {
-        await db.collection('users').doc(currentUser).update({
-            coverUrl: url
-        });
-    }
-    
-    alert('تم تطبيق الصورة!');
-}
-
-async function applyAvatarUrl() {
-    const url = document.getElementById('avatar-url').value.trim();
-    if (!url) return;
-    
-    currentUserData.avatarUrl = url;
-    document.getElementById('avatar-img').src = url;
-    document.getElementById('avatar-img').style.display = 'block';
-    document.getElementById('avatar-letter').style.display = 'none';
-    
-    if (currentUser && !currentUserData.isGuest) {
-        await db.collection('users').doc(currentUser).update({
-            avatarUrl: url
-        });
-    }
-    
-    alert('تم تطبيق الصورة!');
-}
-
 function logout() {
     auth.signOut();
     currentUser = null;
@@ -428,6 +404,11 @@ function uploadCover() {
 
 function uploadAvatar() {
     uploadType = 'avatar';
+    fileInput.click();
+}
+
+function uploadBackground() {
+    uploadType = 'background';
     fileInput.click();
 }
 
@@ -459,7 +440,7 @@ fileInput.addEventListener('change', async (e) => {
                 await db.collection('users').doc(currentUser).update({
                     coverUrl: base64
                 });
-            } else {
+            } else if (uploadType === 'avatar') {
                 currentUserData.avatarUrl = base64;
                 document.getElementById('avatar-img').src = base64;
                 document.getElementById('avatar-img').style.display = 'block';
@@ -467,6 +448,16 @@ fileInput.addEventListener('change', async (e) => {
                 
                 await db.collection('users').doc(currentUser).update({
                     avatarUrl: base64
+                });
+            } else {
+                currentUserData.backgroundUrl = base64;
+                document.getElementById('bg-img').src = base64;
+                document.getElementById('bg-img').style.display = 'block';
+                document.querySelector('.profile-box').style.backgroundImage = `url(${base64})`;
+                document.querySelector('.profile-box').style.backgroundSize = 'cover';
+                
+                await db.collection('users').doc(currentUser).update({
+                    backgroundUrl: base64
                 });
             }
             
@@ -485,7 +476,6 @@ fileInput.addEventListener('change', async (e) => {
 async function removeCover() {
     currentUserData.coverUrl = '';
     document.getElementById('cover-img').style.display = 'none';
-    document.getElementById('cover-url').value = '';
     
     if (currentUser && !currentUserData.isGuest) {
         await db.collection('users').doc(currentUser).update({
@@ -498,11 +488,22 @@ async function removeAvatar() {
     currentUserData.avatarUrl = '';
     document.getElementById('avatar-img').style.display = 'none';
     document.getElementById('avatar-letter').style.display = 'block';
-    document.getElementById('avatar-url').value = '';
     
     if (currentUser && !currentUserData.isGuest) {
         await db.collection('users').doc(currentUser).update({
             avatarUrl: ''
+        });
+    }
+}
+
+async function removeBackground() {
+    currentUserData.backgroundUrl = '';
+    document.getElementById('bg-img').style.display = 'none';
+    document.querySelector('.profile-box').style.backgroundImage = '';
+    
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({
+            backgroundUrl: ''
         });
     }
 }
