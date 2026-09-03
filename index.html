@@ -124,6 +124,39 @@
         </div>
     </div>
 
+    <!-- نافذة البروفايل -->
+    <div class="profile-overlay" id="profile-overlay">
+        <div class="profile-box">
+            <button class="btn-close" onclick="closeProfile()">✕</button>
+            
+            <div class="profile-cover" id="profile-cover">
+                <img id="cover-img" style="display:none" alt="الغلاف">
+                <button class="btn-camera" onclick="uploadCover()">📷</button>
+                <button class="btn-remove" onclick="removeCover()">🗑️</button>
+            </div>
+            
+            <div class="profile-avatar-container">
+                <div class="profile-avatar" id="profile-avatar">
+                    <img id="avatar-img" style="display:none" alt="الصورة الشخصية">
+                    <span id="avatar-letter"></span>
+                </div>
+                <button class="btn-camera" onclick="uploadAvatar()">📷</button>
+                <button class="btn-remove" onclick="removeAvatar()">🗑️</button>
+            </div>
+            
+            <div class="profile-info">
+                <h2 id="profile-name"></h2>
+                <span class="role-badge" id="profile-role"></span>
+                <p class="profile-bio" id="profile-bio" contenteditable="true">اضغط لكتابة تعريف رمزي...</p>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="btn-secondary" onclick="saveProfile()">💾 حفظ</button>
+                <button class="btn-danger" onclick="logout()">🚪 خروج</button>
+            </div>
+        </div>
+    </div>
+
     <!-- القائمة اليسار -->
     <div class="sidebar left-sidebar" id="left-sidebar">
         <div class="sidebar-header">
@@ -153,10 +186,13 @@
     </div>
 
     <div class="overlay" id="overlay" onclick="closeAllSidebars()"></div>
+    
+    <input type="file" id="file-input" style="display:none" accept="image/*">
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
