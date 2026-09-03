@@ -328,7 +328,6 @@ body {
     top: 0;
     height: 100%;
     width: 25%;
-    max-width: 200px;
     background: rgba(10, 10, 10, 0.95);
     z-index: 10;
     transition: transform 0.3s ease;
