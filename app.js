@@ -461,12 +461,18 @@ async function saveProfile() {
 }
 
 function editName() {
-    document.getElementById('name-edit-input').value = currentUserData.username;
+    if (!currentUserData) return;
+    
+    const dialog = document.getElementById('name-edit-dialog');
+    if (!dialog) return;
+    
+    dialog.style.display = 'block';
+    
+    document.getElementById('name-edit-input').value = currentUserData.username || '';
     document.getElementById('name-width-range').value = textStyle.sizeW;
     document.getElementById('name-width-value').textContent = textStyle.sizeW;
     document.getElementById('name-height-range').value = textStyle.sizeH;
     document.getElementById('name-height-value').textContent = textStyle.sizeH;
-    document.getElementById('name-edit-dialog').style.display = 'block';
 }
 
 function closeNameEditDialog() {
@@ -522,7 +528,8 @@ function toggleOptionsMenu() {
 }
 
 function closeOptionsMenu() {
-    document.getElementById('options-menu').style.display = 'none';
+    const menu = document.getElementById('options-menu');
+    if (menu) menu.style.display = 'none';
 }
 
 function openColorDialog() {
@@ -655,6 +662,54 @@ function closeFrameDialog() {
     document.getElementById('frame-dialog').style.display = 'none';
 }
 
+function openProfileBgDialog() {
+    closeOptionsMenu();
+    const dialog = document.getElementById('profile-bg-dialog');
+    const img = document.getElementById('bg-dialog-img');
+    const placeholder = document.getElementById('bg-dialog-placeholder');
+    
+    if (currentUserData?.backgroundUrl) {
+        img.src = currentUserData.backgroundUrl;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        placeholder.style.display = 'block';
+    }
+    
+    dialog.style.display = 'block';
+}
+
+function closeProfileBgDialog() {
+    document.getElementById('profile-bg-dialog').style.display = 'none';
+}
+
+async function saveBackground() {
+    if (currentUserData?.backgroundUrl && currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({
+            backgroundUrl: currentUserData.backgroundUrl
+        });
+    }
+    
+    const bgImg = document.getElementById('bg-img');
+    if (currentUserData?.backgroundUrl) {
+        bgImg.src = currentUserData.backgroundUrl;
+        bgImg.style.display = 'block';
+    }
+    
+    closeProfileBgDialog();
+    alert('تم حفظ الخلفية!');
+}
+
+function removeBackgroundFromDialog() {
+    currentUserData.backgroundUrl = '';
+    document.getElementById('bg-dialog-img').style.display = 'none';
+    document.getElementById('bg-dialog-placeholder').style.display = 'block';
+    
+    const bgImg = document.getElementById('bg-img');
+    bgImg.style.display = 'none';
+}
+
 function closeAllDialogs() {
     document.querySelectorAll('.color-dialog, .dialog').forEach(el => el.style.display = 'none');
 }
@@ -671,8 +726,8 @@ function applyEffect() { closeEffectDialog(); applyStyleToName(); saveTextStyle(
 function applyFrame() { closeFrameDialog(); applyStyleToName(); saveTextStyle(); }
 
 function saveTextStyle() {
-    currentUserData.textStyle = textStyle;
-    if (currentUser && !currentUserData.isGuest) {
+    if (currentUserData) currentUserData.textStyle = textStyle;
+    if (currentUser && !currentUserData?.isGuest) {
         db.collection('users').doc(currentUser).update({ textStyle: textStyle });
     }
 }
@@ -781,27 +836,38 @@ fileInput.addEventListener('change', async (e) => {
         
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
         
-        const updateData = {};
         if (uploadType === 'cover') {
             currentUserData.coverUrl = compressedBase64;
             document.getElementById('cover-img').src = compressedBase64;
             document.getElementById('cover-img').style.display = 'block';
-            updateData.coverUrl = compressedBase64;
         } else if (uploadType === 'avatar') {
             currentUserData.avatarUrl = compressedBase64;
             document.getElementById('avatar-img').src = compressedBase64;
             document.getElementById('avatar-img').style.display = 'block';
             document.getElementById('avatar-letter').style.display = 'none';
-            updateData.avatarUrl = compressedBase64;
         } else if (uploadType === 'background') {
             currentUserData.backgroundUrl = compressedBase64;
-            document.getElementById('bg-img').src = compressedBase64;
-            document.getElementById('bg-img').style.display = 'block';
-            updateData.backgroundUrl = compressedBase64;
+            const bgImg = document.getElementById('bg-img');
+            bgImg.src = compressedBase64;
+            bgImg.style.display = 'block';
+            
+            const dialogImg = document.getElementById('bg-dialog-img');
+            const placeholder = document.getElementById('bg-dialog-placeholder');
+            if (dialogImg) {
+                dialogImg.src = compressedBase64;
+                dialogImg.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
         }
         
-        await db.collection('users').doc(currentUser).update(updateData);
-        alert('تم رفع الصورة!');
+        if (uploadType !== 'background') {
+            const updateData = {};
+            if (uploadType === 'cover') updateData.coverUrl = compressedBase64;
+            if (uploadType === 'avatar') updateData.avatarUrl = compressedBase64;
+            await db.collection('users').doc(currentUser).update(updateData);
+        }
+        
+        alert('تم اختيار الصورة!');
     };
     
     reader.readAsDataURL(file);
@@ -822,14 +888,6 @@ async function removeAvatar() {
     document.getElementById('avatar-letter').style.display = 'block';
     if (currentUser && !currentUserData?.isGuest) {
         await db.collection('users').doc(currentUser).update({ avatarUrl: '' });
-    }
-}
-
-async function removeBackground() {
-    currentUserData.backgroundUrl = '';
-    document.getElementById('bg-img').style.display = 'none';
-    if (currentUser && !currentUserData?.isGuest) {
-        await db.collection('users').doc(currentUser).update({ backgroundUrl: '' });
     }
 }
 
