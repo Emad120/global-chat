@@ -51,25 +51,28 @@ const colors = [
 ];
 
 const effects = [
-    { value: 'none', label: 'بدون' },
-    { value: 'glow', label: 'توهج' },
-    { value: 'blink', label: 'وميض' },
-    { value: 'pulse', label: 'نبض' },
-    { value: 'rainbow', label: 'قوس قزح' },
-    { value: 'shake', label: 'اهتزاز' },
-    { value: 'float', label: 'طفو' },
-    { value: 'bounce', label: 'قفز' },
-    { value: 'swing', label: 'تأرجح' },
-    { value: 'wobble', label: 'تمايل' },
-    { value: 'zoom', label: 'زوم' },
-    { value: 'flip', label: 'انعكاس' },
-    { value: 'slide', label: 'انزلاق' },
-    { value: 'fade', label: 'تلاشي' },
-    { value: 'rotate', label: 'دوران' },
-    { value: 'scale', label: 'تكبير' },
-    { value: 'glitter', label: 'بريق' },
-    { value: 'shining', label: 'لمعان' },
-    { value: 'flashing', label: 'وميض قوي' }
+    { value: 'none', label: 'بدون', animation: 'none' },
+    { value: 'glow-gold', label: 'توهج ذهبي', animation: 'glow-gold' },
+    { value: 'glow-white', label: 'توهج أبيض', animation: 'glow-white' },
+    { value: 'glow-blue', label: 'توهج أزرق', animation: 'glow-blue' },
+    { value: 'glow-red', label: 'توهج أحمر', animation: 'glow-red' },
+    { value: 'glow-green', label: 'توهج أخضر', animation: 'glow-green' },
+    { value: 'glow-purple', label: 'توهج بنفسجي', animation: 'glow-purple' },
+    { value: 'glow-rainbow', label: 'توهج قوس قزح', animation: 'glow-rainbow' },
+    { value: 'blink', label: 'وميض', animation: 'blink' },
+    { value: 'bounce', label: 'قفز', animation: 'bounce' },
+    { value: 'swing', label: 'تأرجح', animation: 'swing' },
+    { value: 'wobble', label: 'تمايل', animation: 'wobble' },
+    { value: 'zoom', label: 'زوم', animation: 'zoom' },
+    { value: 'flip', label: 'انعكاس', animation: 'flip' },
+    { value: 'slide', label: 'انزلاق', animation: 'slide' },
+    { value: 'fade', label: 'تلاشي', animation: 'fade' },
+    { value: 'rotate', label: 'دوران', animation: 'rotate' },
+    { value: 'scale', label: 'تكبير', animation: 'scale' },
+    { value: 'glitter', label: 'بريق', animation: 'glitter' },
+    { value: 'shining', label: 'لمعان', animation: 'shining' },
+    { value: 'flashing', label: 'وميض قوي', animation: 'flashing' },
+    { value: 'color-change', label: 'تغيير لون', animation: 'color-change' }
 ];
 
 const frames = [
@@ -229,8 +232,8 @@ async function loadUserData(uid) {
         
         if (currentUserData.textStyle) {
             textStyle = currentUserData.textStyle;
-            if (!textStyle.sizeW) textStyle.sizeW = textStyle.size;
-            if (!textStyle.sizeH) textStyle.sizeH = textStyle.size;
+            if (!textStyle.sizeW) textStyle.sizeW = textStyle.size || 22;
+            if (!textStyle.sizeH) textStyle.sizeH = textStyle.size || 22;
             if (!textStyle.frame) textStyle.frame = 'none';
         }
     }
@@ -303,6 +306,37 @@ function listenForMessages() {
         });
 }
 
+function getEffectAnimation(effect) {
+    switch(effect) {
+        case 'glow-gold': return 'glow-gold';
+        case 'glow-white': return 'glow-white';
+        case 'glow-blue': return 'glow-blue';
+        case 'glow-red': return 'glow-red';
+        case 'glow-green': return 'glow-green';
+        case 'glow-purple': return 'glow-purple';
+        case 'glow-rainbow': return 'glow-rainbow';
+        case 'blink': return 'blink';
+        case 'pulse': return 'pulse';
+        case 'rainbow': return 'rainbow';
+        case 'shake': return 'shake';
+        case 'float': return 'float';
+        case 'bounce': return 'bounce';
+        case 'swing': return 'swing';
+        case 'wobble': return 'wobble';
+        case 'zoom': return 'zoom';
+        case 'flip': return 'flip';
+        case 'slide': return 'slide';
+        case 'fade': return 'fade';
+        case 'rotate': return 'rotate';
+        case 'scale': return 'scale';
+        case 'glitter': return 'glitter';
+        case 'shining': return 'shining';
+        case 'flashing': return 'flashing';
+        case 'color-change': return 'color-change';
+        default: return 'none';
+    }
+}
+
 function addMessageToScreen(msg, id) {
     const div = document.createElement('div');
     div.className = 'message';
@@ -335,61 +369,9 @@ function addMessageToScreen(msg, id) {
         if (ts.frame === 'green') nameStyle += `border: 2px solid #00ff00; box-shadow: 0 0 10px #00ff00;`;
         if (ts.frame === 'purple') nameStyle += `border: 2px solid #9b59b6; box-shadow: 0 0 10px #9b59b6;`;
         
-        switch(ts.effect) {
-            case 'glow':
-                nameStyle += `text-shadow: 0 0 ${ts.intensity * 2}px ${ts.color};`;
-                break;
-            case 'rainbow':
-                nameStyle += `animation: rainbow ${5 / ts.intensity}s infinite;`;
-                break;
-            case 'blink':
-                nameStyle += `animation: blink ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'pulse':
-                nameStyle += `animation: pulse ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'shake':
-                nameStyle += `animation: shake ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'float':
-                nameStyle += `animation: float ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'bounce':
-                nameStyle += `animation: bounce ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'swing':
-                nameStyle += `animation: swing ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'wobble':
-                nameStyle += `animation: wobble ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'zoom':
-                nameStyle += `animation: zoom ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'flip':
-                nameStyle += `animation: flip ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'slide':
-                nameStyle += `animation: slide ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'fade':
-                nameStyle += `animation: fade ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'rotate':
-                nameStyle += `animation: rotate ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'scale':
-                nameStyle += `animation: scale ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'glitter':
-                nameStyle += `animation: glitter ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'shining':
-                nameStyle += `animation: shining ${3 / ts.intensity}s infinite;`;
-                break;
-            case 'flashing':
-                nameStyle += `animation: flashing ${2 / ts.intensity}s infinite;`;
-                break;
+        const anim = getEffectAnimation(ts.effect);
+        if (anim !== 'none') {
+            nameStyle += `animation: ${anim} ${3 / (ts.intensity || 5)}s infinite;`;
         }
     }
     
@@ -678,19 +660,33 @@ function closeFontDialog() {
 
 function openEffectDialog() {
     closeOptionsMenu();
-    const select = document.getElementById('effect-select');
-    select.innerHTML = '';
+    const effectList = document.getElementById('effect-list');
+    effectList.innerHTML = '';
     
     effects.forEach(effect => {
-        const option = document.createElement('option');
-        option.value = effect.value;
-        option.textContent = effect.label;
-        select.appendChild(option);
+        const div = document.createElement('div');
+        div.className = 'effect-item';
+        
+        const preview = document.createElement('div');
+        preview.className = 'effect-preview';
+        preview.textContent = currentUserData.username;
+        
+        if (effect.animation !== 'none') {
+            preview.style.animation = `${effect.animation} ${3 / textStyle.intensity}s infinite`;
+        }
+        
+        div.appendChild(preview);
+        div.appendChild(document.createTextNode(effect.label));
+        
+        div.onclick = function() {
+            textStyle.effect = effect.value;
+            effectList.querySelectorAll('.effect-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+        };
+        
+        effectList.appendChild(div);
     });
     
-    select.value = textStyle.effect;
-    document.getElementById('effect-intensity').value = textStyle.intensity;
-    document.getElementById('intensity-value').textContent = textStyle.intensity;
     document.getElementById('effect-dialog').style.display = 'block';
 }
 
@@ -711,7 +707,6 @@ function openFrameDialog() {
             textStyle.frame = frame.value;
             frameList.querySelectorAll('.frame-item').forEach(el => el.classList.remove('selected'));
             div.classList.add('selected');
-            applyStyleToName();
         };
         frameList.appendChild(div);
     });
@@ -745,8 +740,6 @@ function applyFont() {
 }
 
 function applyEffect() {
-    textStyle.effect = document.getElementById('effect-select').value;
-    textStyle.intensity = parseInt(document.getElementById('effect-intensity').value);
     closeEffectDialog();
     applyStyleToName();
     saveTextStyle();
@@ -754,6 +747,7 @@ function applyEffect() {
 
 function applyFrame() {
     closeFrameDialog();
+    applyStyleToName();
     saveTextStyle();
 }
 
@@ -785,61 +779,9 @@ function applyStyleToName() {
     nameEl.style.cssText = css;
     nameEl.style.animation = 'none';
     
-    switch(textStyle.effect) {
-        case 'glow':
-            nameEl.style.textShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
-            break;
-        case 'blink':
-            nameEl.style.animation = `blink ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'pulse':
-            nameEl.style.animation = `pulse ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'rainbow':
-            nameEl.style.animation = `rainbow ${5 / textStyle.intensity}s infinite`;
-            break;
-        case 'shake':
-            nameEl.style.animation = `shake ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'float':
-            nameEl.style.animation = `float ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'bounce':
-            nameEl.style.animation = `bounce ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'swing':
-            nameEl.style.animation = `swing ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'wobble':
-            nameEl.style.animation = `wobble ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'zoom':
-            nameEl.style.animation = `zoom ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'flip':
-            nameEl.style.animation = `flip ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'slide':
-            nameEl.style.animation = `slide ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'fade':
-            nameEl.style.animation = `fade ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'rotate':
-            nameEl.style.animation = `rotate ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'scale':
-            nameEl.style.animation = `scale ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'glitter':
-            nameEl.style.animation = `glitter ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'shining':
-            nameEl.style.animation = `shining ${3 / textStyle.intensity}s infinite`;
-            break;
-        case 'flashing':
-            nameEl.style.animation = `flashing ${2 / textStyle.intensity}s infinite`;
-            break;
+    const anim = getEffectAnimation(textStyle.effect);
+    if (anim !== 'none') {
+        nameEl.style.animation = `${anim} ${3 / textStyle.intensity}s infinite`;
     }
 }
 
