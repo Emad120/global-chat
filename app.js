@@ -48,6 +48,29 @@ const colors = [
     '#f39c12', '#e67e22', '#d35400', '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d'
 ];
 
+const effects = [
+    { value: 'none', label: 'بدون' },
+    { value: 'glow', label: 'توهج' },
+    { value: 'blink', label: 'وميض' },
+    { value: 'pulse', label: 'نبض' },
+    { value: 'rainbow', label: 'قوس قزح' },
+    { value: 'shake', label: 'اهتزاز' },
+    { value: 'float', label: 'طفو' },
+    { value: 'border-glow', label: 'إطار متوهج' },
+    { value: 'bounce', label: 'قفز' },
+    { value: 'swing', label: 'تأرجح' },
+    { value: 'wobble', label: 'تمايل' },
+    { value: 'zoom', label: 'زوم' },
+    { value: 'flip', label: 'انعكاس' },
+    { value: 'slide', label: 'انزلاق' },
+    { value: 'fade', label: 'تلاشي' },
+    { value: 'rotate', label: 'دوران' },
+    { value: 'scale', label: 'تكبير' },
+    { value: 'glitter', label: 'بريق' },
+    { value: 'shining', label: 'لمعان' },
+    { value: 'flashing', label: 'وميض قوي' }
+];
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -286,6 +309,66 @@ function addMessageToScreen(msg, id) {
     if (msg.textStyle) {
         const ts = msg.textStyle;
         nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};background:transparent;`;
+        
+        switch(ts.effect) {
+            case 'glow':
+                nameStyle += `text-shadow: 0 0 ${ts.intensity * 2}px ${ts.color};`;
+                break;
+            case 'rainbow':
+                nameStyle += `animation: rainbow ${5 / ts.intensity}s infinite;`;
+                break;
+            case 'blink':
+                nameStyle += `animation: blink ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'pulse':
+                nameStyle += `animation: pulse ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'shake':
+                nameStyle += `animation: shake ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'float':
+                nameStyle += `animation: float ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'bounce':
+                nameStyle += `animation: bounce ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'swing':
+                nameStyle += `animation: swing ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'wobble':
+                nameStyle += `animation: wobble ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'zoom':
+                nameStyle += `animation: zoom ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'flip':
+                nameStyle += `animation: flip ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'slide':
+                nameStyle += `animation: slide ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'fade':
+                nameStyle += `animation: fade ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'rotate':
+                nameStyle += `animation: rotate ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'scale':
+                nameStyle += `animation: scale ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'glitter':
+                nameStyle += `animation: glitter ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'shining':
+                nameStyle += `animation: shining ${3 / ts.intensity}s infinite;`;
+                break;
+            case 'flashing':
+                nameStyle += `animation: flashing ${2 / ts.intensity}s infinite;`;
+                break;
+            case 'border-glow':
+                nameStyle += `border: 2px solid ${ts.color}; box-shadow: 0 0 ${ts.intensity * 2}px ${ts.color};`;
+                break;
+        }
     }
     
     div.innerHTML = `
@@ -572,10 +655,20 @@ function closeFontDialog() {
 
 function openEffectDialog() {
     closeOptionsMenu();
-    document.getElementById('effect-dialog').style.display = 'block';
-    document.getElementById('effect-select').value = textStyle.effect;
+    const select = document.getElementById('effect-select');
+    select.innerHTML = '';
+    
+    effects.forEach(effect => {
+        const option = document.createElement('option');
+        option.value = effect.value;
+        option.textContent = effect.label;
+        select.appendChild(option);
+    });
+    
+    select.value = textStyle.effect;
     document.getElementById('effect-intensity').value = textStyle.intensity;
     document.getElementById('intensity-value').textContent = textStyle.intensity;
+    document.getElementById('effect-dialog').style.display = 'block';
 }
 
 function closeEffectDialog() {
@@ -661,6 +754,42 @@ function applyStyleToName() {
             break;
         case 'float':
             nameEl.style.animation = `float ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'bounce':
+            nameEl.style.animation = `bounce ${2 / textStyle.intensity}s infinite`;
+            break;
+        case 'swing':
+            nameEl.style.animation = `swing ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'wobble':
+            nameEl.style.animation = `wobble ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'zoom':
+            nameEl.style.animation = `zoom ${2 / textStyle.intensity}s infinite`;
+            break;
+        case 'flip':
+            nameEl.style.animation = `flip ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'slide':
+            nameEl.style.animation = `slide ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'fade':
+            nameEl.style.animation = `fade ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'rotate':
+            nameEl.style.animation = `rotate ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'scale':
+            nameEl.style.animation = `scale ${2 / textStyle.intensity}s infinite`;
+            break;
+        case 'glitter':
+            nameEl.style.animation = `glitter ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'shining':
+            nameEl.style.animation = `shining ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'flashing':
+            nameEl.style.animation = `flashing ${2 / textStyle.intensity}s infinite`;
             break;
         case 'border-glow':
             nameEl.style.border = `2px solid ${textStyle.color}`;
