@@ -137,9 +137,9 @@
             <div class="options-menu" id="options-menu" style="display:none">
                 <button class="option-item" onclick="openColorDialog()">🎨 لون الاسم</button>
                 <button class="option-item" onclick="openBgDialog()">🖼️ خلفية الاسم</button>
-                <button class="option-item" onclick="openSizeDialog()">📏 حجم الاسم</button>
                 <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
                 <button class="option-item" onclick="openEffectDialog()">✨ Gif الاسم</button>
+                <button class="option-item" onclick="openFrameDialog()">🔲 إطارات متوهجة</button>
             </div>
             
             <div class="cover-buttons">
@@ -205,18 +205,6 @@
         </div>
     </div>
 
-    <div class="dialog" id="size-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>📏 حجم الاسم</h4>
-                <button onclick="closeSizeDialog()">✕</button>
-            </div>
-            <input type="range" id="size-range" min="12" max="48" value="22">
-            <span id="size-value">22</span>
-            <button class="btn-apply" onclick="applySize()">تطبيق</button>
-        </div>
-    </div>
-
     <div class="dialog" id="font-dialog" style="display:none">
         <div class="dialog-content">
             <div class="dialog-header">
@@ -253,11 +241,50 @@
                 <option value="rainbow">قوس قزح</option>
                 <option value="shake">اهتزاز</option>
                 <option value="float">طفو</option>
-                <option value="border-glow">إطار متوهج</option>
+                <option value="bounce">قفز</option>
+                <option value="swing">تأرجح</option>
+                <option value="wobble">تمايل</option>
+                <option value="zoom">زوم</option>
+                <option value="flip">انعكاس</option>
+                <option value="slide">انزلاق</option>
+                <option value="fade">تلاشي</option>
+                <option value="rotate">دوران</option>
+                <option value="scale">تكبير</option>
+                <option value="glitter">بريق</option>
+                <option value="shining">لمعان</option>
+                <option value="flashing">وميض قوي</option>
             </select>
             <input type="range" id="effect-intensity" min="1" max="10" value="5">
             <span id="intensity-value">5</span>
             <button class="btn-apply" onclick="applyEffect()">تطبيق</button>
+        </div>
+    </div>
+
+    <div class="dialog" id="frame-dialog" style="display:none">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h4>🔲 إطارات متوهجة</h4>
+                <button onclick="closeFrameDialog()">✕</button>
+            </div>
+            <div class="frame-list" id="frame-list"></div>
+            <button class="btn-apply" onclick="applyFrame()">تطبيق</button>
+        </div>
+    </div>
+
+    <div class="dialog" id="name-edit-dialog" style="display:none">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h4>✏️ تعديل الاسم</h4>
+                <button onclick="closeNameEditDialog()">✕</button>
+            </div>
+            <input type="text" id="name-edit-input" maxlength="20" placeholder="الاسم...">
+            <label>عرض الخط</label>
+            <input type="range" id="name-width-range" min="10" max="40" value="22">
+            <span id="name-width-value">22</span>
+            <label>طول الخط</label>
+            <input type="range" id="name-height-range" min="10" max="40" value="22">
+            <span id="name-height-value">22</span>
+            <button class="btn-apply" onclick="applyNameEdit()">تطبيق</button>
         </div>
     </div>
 
