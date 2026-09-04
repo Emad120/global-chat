@@ -143,7 +143,7 @@
             </div>
             
             <div class="cover-buttons">
-                <button class="btn-cover-camera" id="cover-upload-btn">📷</button>
+                <button class="btn-cover-camera" onclick="triggerUpload('cover')">📷</button>
                 <button class="btn-cover-remove" onclick="removeCover()">✕</button>
             </div>
             
@@ -152,7 +152,7 @@
                     <img id="avatar-img" style="display:none" alt="الصورة الشخصية">
                     <span id="avatar-letter"></span>
                 </div>
-                <button class="btn-camera" id="avatar-upload-btn">📷</button>
+                <button class="btn-camera" onclick="triggerUpload('avatar')">📷</button>
                 <button class="btn-remove" onclick="removeAvatar()">✕</button>
             </div>
             
@@ -171,7 +171,7 @@
             
             <div class="profile-background">
                 <div class="bg-actions">
-                    <button class="btn-camera" id="bg-upload-btn">📷</button>
+                    <button class="btn-camera" onclick="triggerUpload('background')">📷</button>
                     <button class="btn-remove" onclick="removeBackground()">✕</button>
                 </div>
                 <img id="bg-img" style="display:none" alt="الخلفية">
