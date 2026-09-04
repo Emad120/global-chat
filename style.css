@@ -599,6 +599,13 @@ body {
     transform: translateY(-50%);
 }
 
+.name-row .btn-style {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .bio-row {
     display: flex;
     align-items: center;
@@ -621,6 +628,17 @@ body {
 }
 
 .btn-edit {
+    width: 25px;
+    height: 25px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.3);
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-style {
     width: 25px;
     height: 25px;
     border: none;
@@ -709,4 +727,106 @@ body {
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
     font-size: 11px;
+}
+
+.text-editor {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 350px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    z-index: 30;
+    padding: 15px;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.editor-header h4 {
+    color: #d4af37;
+}
+
+.editor-header button {
+    width: 25px;
+    height: 25px;
+    border: none;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.editor-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.editor-section label {
+    color: #d4af37;
+    font-size: 12px;
+}
+
+.editor-section select,
+.editor-section input[type="color"],
+.editor-section input[type="range"] {
+    padding: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    width: 100%;
+}
+
+.style-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.style-buttons button {
+    width: 35px;
+    height: 35px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.style-buttons button.active {
+    background: #d4af37;
+    color: #000;
+}
+
+.btn-apply {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #d4af37;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
 }
