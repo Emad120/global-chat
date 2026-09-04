@@ -925,11 +925,8 @@ function initPeer() {
         myPeerId = id;
         console.log('My Peer ID:', id);
         
-        // تحديث حالة المستخدم
         if (currentUser) {
-            db.collection('users').doc(currentUser).update({
-                peerId: id
-            });
+            db.collection('users').doc(currentUser).update({ peerId: id });
         }
     });
     
@@ -950,12 +947,33 @@ function initPeer() {
         
         activeCalls[call.peer] = call;
     });
+    
+    peer.on('error', (err) => {
+        console.error('PeerJS Error:', err);
+    });
 }
 
-// مزامنة حالة المايكات
+function connectToPeer(remotePeerId) {
+    if (!peer || !myStream) return;
+    if (activeCalls[remotePeerId]) return;
+    
+    try {
+        const call = peer.call(remotePeerId, myStream);
+        
+        call.on('stream', (remoteStream) => {
+            const audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play().catch(() => {});
+        });
+        
+        activeCalls[remotePeerId] = call;
+    } catch (err) {
+        console.error('Call Error:', err);
+    }
+}
+
 function listenForMics() {
     db.collection('mics').orderBy('micNumber').onSnapshot((snapshot) => {
-        // تصفير كل المايكات
         for (let i = 1; i <= 4; i++) {
             const micEl = document.getElementById('mic' + i);
             micEl.classList.remove('taken');
@@ -969,6 +987,13 @@ function listenForMics() {
                 micEl.classList.add('taken');
                 micEl.textContent = micData.username.charAt(0);
             }
+            
+            // الاتصال التلقائي
+            if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
+                setTimeout(() => {
+                    connectToPeer(micData.peerId);
+                }, 2000);
+            }
         });
     });
 }
@@ -979,7 +1004,6 @@ async function joinMic(micNumber) {
         return;
     }
     
-    // تأكد إن المايك فاضي
     const micDoc = await db.collection('mics').doc('mic' + micNumber).get();
     if (micDoc.exists && micDoc.data().userId !== currentUser) {
         alert('المايك مأخوذ!');
@@ -1002,7 +1026,6 @@ async function joinMic(micNumber) {
         
         joinedMicNumber = micNumber;
         
-        // حفظ حالة المايك
         await db.collection('mics').doc('mic' + micNumber).set({
             micNumber: micNumber,
             userId: currentUser,
@@ -1030,7 +1053,6 @@ async function leaveMic() {
         Object.values(activeCalls).forEach(call => call.close());
         activeCalls = {};
         
-        // حذف حالة المايك
         await db.collection('mics').doc('mic' + joinedMicNumber).delete();
         
         alert('غادرت المايك');
