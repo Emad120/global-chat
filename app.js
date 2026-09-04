@@ -471,8 +471,6 @@ function editName() {
     document.getElementById('name-edit-input').value = currentUserData.username || '';
     document.getElementById('name-width-range').value = textStyle.sizeW;
     document.getElementById('name-width-value').textContent = textStyle.sizeW;
-    document.getElementById('name-height-range').value = textStyle.sizeH;
-    document.getElementById('name-height-value').textContent = textStyle.sizeH;
 }
 
 function closeNameEditDialog() {
@@ -491,7 +489,7 @@ function applyNameEdit() {
     }
     
     textStyle.sizeW = parseInt(document.getElementById('name-width-range').value);
-    textStyle.sizeH = parseInt(document.getElementById('name-height-range').value);
+    textStyle.sizeH = textStyle.sizeW;
     
     closeNameEditDialog();
     applyStyleToName();
@@ -762,15 +760,6 @@ if (widthRange) {
     widthRange.addEventListener('input', function() {
         textStyle.sizeW = parseInt(this.value);
         document.getElementById('name-width-value').textContent = this.value;
-        applyStyleToName();
-    });
-}
-
-const heightRange = document.getElementById('name-height-range');
-if (heightRange) {
-    heightRange.addEventListener('input', function() {
-        textStyle.sizeH = parseInt(this.value);
-        document.getElementById('name-height-value').textContent = this.value;
         applyStyleToName();
     });
 }
