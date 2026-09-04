@@ -122,41 +122,31 @@
         </div>
     </div>
 
+    <!-- نافذة البروفايل المعاد ترتيبها لتطابق النموذج والصورة تماماً -->
     <div class="profile-overlay" id="profile-overlay">
         <div class="profile-box">
             <button class="btn-close" onclick="closeProfile()">✕</button>
             
+            <!-- 1. بانر الغلاف العلوي مع أزرار الكاميرا والحذف بداخله -->
             <div class="profile-cover" id="profile-cover">
                 <img id="cover-img" style="display:none" alt="الغلاف">
+                <div class="cover-buttons">
+                    <button class="btn-cover-camera" onclick="triggerUpload('cover')">📷</button>
+                    <button class="btn-cover-remove" onclick="removeCover()">✕</button>
+                </div>
             </div>
             
-            <div class="cover-buttons">
-                <label class="btn-cover-camera" for="file-input" onclick="setUploadType('cover')">📷</label>
-                <button class="btn-cover-remove" onclick="removeCover()">✕</button>
-            </div>
-            
-            <div class="profile-toolbar">
-                <button class="toolbar-btn" onclick="toggleOptionsMenu()">⚙️ خيارات</button>
-            </div>
-            
-            <div class="options-menu" id="options-menu" style="display:none">
-                <button class="option-item" onclick="openColorDialog()">🎨 لون الاسم</button>
-                <button class="option-item" onclick="openBgDialog()">🖼️ خلفية الاسم</button>
-                <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
-                <button class="option-item" onclick="openEffectDialog()">✨ حركة</button>
-                <button class="option-item" onclick="openFrameDialog()">🔲 إطارات متوهجة</button>
-                <button class="option-item" onclick="openProfileBgDialog()">🖼️ خلفية البروفايل</button>
-            </div>
-            
+            <!-- 2. الأفاتار المتداخل مع حافة الغلاف -->
             <div class="profile-avatar-container">
                 <div class="profile-avatar" id="profile-avatar">
                     <img id="avatar-img" style="display:none" alt="الصورة الشخصية">
                     <span id="avatar-letter"></span>
                 </div>
-                <label class="btn-camera" for="file-input" onclick="setUploadType('avatar')">📷</label>
+                <button class="btn-camera" onclick="triggerUpload('avatar')">📷</button>
                 <button class="btn-remove" onclick="removeAvatar()">✕</button>
             </div>
             
+            <!-- معلومات الاسم والتعريف -->
             <div class="profile-info">
                 <div class="name-row">
                     <h2 id="profile-name"></h2>
@@ -167,33 +157,38 @@
                     <button class="btn-edit" onclick="editBio()">✏️</button>
                 </div>
             </div>
+
+            <!-- 3. شريط التبويبات الأفقي تماماً مثل النموذج (المعلومات، الأصدقاء، الهدايا...) -->
+            <div class="profile-tabs-bar">
+                <button class="profile-tab-btn active">📁 المعلومات</button>
+                <button class="profile-tab-btn">👥 الأصدقاء</button>
+                <button class="profile-tab-btn">🎁 الهدايا</button>
+                <button class="profile-tab-btn">🎙️ الجلسات</button>
+                <button class="profile-tab-btn" onclick="toggleOptionsMenu()">⚙️ المزيد</button>
+            </div>
+            
+            <!-- قائمة الخيارات المنسدلة -->
+            <div class="options-menu" id="options-menu" style="display:none">
+                <button class="option-item" onclick="openColorDialog()">🎨 لون الاسم</button>
+                <button class="option-item" onclick="openBgDialog()">🖼️ خلفية الاسم</button>
+                <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
+                <button class="option-item" onclick="openEffectDialog()">✨ حركة</button>
+                <button class="option-item" onclick="openFrameDialog()">🔲 إطارات متوهجة</button>
+            </div>
             
             <div class="divider"></div>
             
+            <!-- 4. خلفية البروفايل السفلية -->
             <div class="profile-background">
+                <div class="bg-actions">
+                    <button class="btn-camera" onclick="triggerUpload('background')">📷</button>
+                    <button class="btn-remove" onclick="removeBackground()">✕</button>
+                </div>
                 <img id="bg-img" style="display:none" alt="الخلفية">
             </div>
             
             <div class="profile-actions">
                 <button class="btn-secondary" onclick="saveProfile()">💾 حفظ</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="dialog" id="profile-bg-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>🖼️ خلفية البروفايل</h4>
-                <button onclick="closeProfileBgDialog()">✕</button>
-            </div>
-            <div class="bg-dialog-preview">
-                <img id="bg-dialog-img" style="display:none" alt="معاينة">
-                <span id="bg-dialog-placeholder">لا توجد صورة</span>
-            </div>
-            <div class="bg-dialog-actions">
-                <label class="btn-apply" for="file-input" onclick="setUploadType('background')">📷 اختيار صورة</label>
-                <button class="btn-apply" onclick="saveBackground()">💾 حفظ</button>
-                <button class="btn-danger" onclick="removeBackgroundFromDialog()">✕ إزالة</button>
             </div>
         </div>
     </div>
