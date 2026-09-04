@@ -324,8 +324,10 @@ function openProfile() {
     if (!currentUserData) return;
     
     document.getElementById('profile-name').textContent = currentUserData.username;
+    document.getElementById('profile-name').contentEditable = false;
     document.getElementById('profile-role').textContent = currentUserData.role || 'Guest';
-    document.getElementById('profile-bio').textContent = currentUserData.bio || 'اضغط لكتابة تعريف رمزي...';
+    document.getElementById('profile-bio').textContent = currentUserData.bio || '';
+    document.getElementById('profile-bio').contentEditable = false;
     
     const avatarImg = document.getElementById('avatar-img');
     const avatarLetter = document.getElementById('avatar-letter');
@@ -352,11 +354,8 @@ function openProfile() {
     if (currentUserData.backgroundUrl) {
         bgImg.src = currentUserData.backgroundUrl;
         bgImg.style.display = 'block';
-        document.querySelector('.profile-box').style.backgroundImage = `url(${currentUserData.backgroundUrl})`;
-        document.querySelector('.profile-box').style.backgroundSize = 'cover';
     } else {
         bgImg.style.display = 'none';
-        document.querySelector('.profile-box').style.backgroundImage = '';
     }
     
     profileOverlay.classList.add('show');
@@ -384,6 +383,54 @@ async function saveProfile() {
     
     closeProfile();
     alert('تم الحفظ!');
+}
+
+function editName() {
+    const nameEl = document.getElementById('profile-name');
+    nameEl.contentEditable = true;
+    nameEl.focus();
+    
+    nameEl.addEventListener('blur', async function() {
+        nameEl.contentEditable = false;
+        const newName = nameEl.textContent.trim();
+        
+        if (newName && newName !== currentUserData.username) {
+            currentUserData.username = newName;
+            
+            if (currentUser && !currentUserData.isGuest) {
+                await db.collection('users').doc(currentUser).update({
+                    username: newName
+                });
+            }
+        }
+    }, { once: true });
+}
+
+function editBio() {
+    const bioEl = document.getElementById('profile-bio');
+    bioEl.contentEditable = true;
+    bioEl.focus();
+    
+    bioEl.addEventListener('blur', async function() {
+        bioEl.contentEditable = false;
+        const newBio = bioEl.textContent.trim();
+        
+        if (newBio.length > 20) {
+            alert('التعريف الرمزي 20 حرف كحد أقصى');
+            bioEl.textContent = currentUserData.bio || '';
+            return;
+        }
+        
+        if (newBio !== currentUserData.bio) {
+            currentUserData.bio = newBio;
+            
+            if (currentUser && !currentUserData.isGuest) {
+                await db.collection('users').doc(currentUser).update({
+                    bio: newBio
+                });
+            }
+        }
+    }, { once: true });
 }
 
 function logout() {
@@ -453,8 +500,6 @@ fileInput.addEventListener('change', async (e) => {
                 currentUserData.backgroundUrl = base64;
                 document.getElementById('bg-img').src = base64;
                 document.getElementById('bg-img').style.display = 'block';
-                document.querySelector('.profile-box').style.backgroundImage = `url(${base64})`;
-                document.querySelector('.profile-box').style.backgroundSize = 'cover';
                 
                 await db.collection('users').doc(currentUser).update({
                     backgroundUrl: base64
@@ -499,7 +544,6 @@ async function removeAvatar() {
 async function removeBackground() {
     currentUserData.backgroundUrl = '';
     document.getElementById('bg-img').style.display = 'none';
-    document.querySelector('.profile-box').style.backgroundImage = '';
     
     if (currentUser && !currentUserData.isGuest) {
         await db.collection('users').doc(currentUser).update({
