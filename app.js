@@ -11,9 +11,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// إزالة كلمة السر والبيانات الحساسة من المتصفح لعدم الاختراق
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
 const OWNER_USERNAME = 'Emad';
-const OWNER_PASSWORD = '1208804500';
 
 let currentUser = null;
 let currentUserData = null;
@@ -89,14 +89,14 @@ const frames = [
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + tab).style.display = 'flex';
-    event.target.classList.add('active');
+    const targetTab = document.getElementById('tab-' + tab);
+    if (targetTab) targetTab.style.display = 'flex';
+    if (event && event.target) event.target.classList.add('active');
 }
 
 function isOwner() {
     if (!currentUserData) return false;
-    return currentUserData.email === OWNER_EMAIL && 
-           currentUserData.username === OWNER_USERNAME;
+    return currentUserData.email === OWNER_EMAIL && currentUserData.username === OWNER_USERNAME;
 }
 
 async function registerUser() {
@@ -109,25 +109,17 @@ async function registerUser() {
         alert('املأ كل الحقول');
         return;
     }
-    
     if (password !== confirm) {
         alert('كلمة السر غير متطابقة');
         return;
     }
-    
     if (password.length < 6) {
         alert('كلمة السر قصيرة - 6 أحرف على الأقل');
         return;
     }
     
-    if (email === OWNER_EMAIL && password !== OWNER_PASSWORD) {
-        alert('كلمة السر غير صحيحة للمالك');
-        return;
-    }
-    
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
         const role = (email === OWNER_EMAIL && username === OWNER_USERNAME) ? 'King' : 'Guest';
         
         await db.collection('users').doc(userCredential.user.uid).set({
@@ -161,7 +153,6 @@ async function loginUser() {
     
     try {
         let email = usernameOrEmail;
-        
         if (!usernameOrEmail.includes('@')) {
             const snapshot = await db.collection('users')
                 .where('username', '==', usernameOrEmail)
@@ -172,12 +163,10 @@ async function loginUser() {
                 alert('المستخدم غير موجود');
                 return;
             }
-            
             email = snapshot.docs[0].data().email;
         }
         
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        
         if (!userCredential.user.emailVerified) {
             alert('يرجى تأكيد إيميلك أولاً');
             return;
@@ -190,6 +179,7 @@ async function loginUser() {
     }
 }
 
+// تسجيل دخول الزوار المجهول رسمياً بـ Firebase Auth
 async function guestLogin() {
     const username = document.getElementById('guest-username').value.trim();
     const age = document.getElementById('guest-age').value;
@@ -199,28 +189,32 @@ async function guestLogin() {
         alert('املأ كل الحقول');
         return;
     }
-    
     if (age < 10 || age > 99) {
         alert('عمر غير صحيح');
         return;
     }
     
-    currentUser = 'guest_' + Date.now();
-    currentUserData = {
-        username: username,
-        age: age,
-        gender: gender,
-        role: 'Guest',
-        isGuest: true,
-        email: null,
-        bio: '',
-        coverUrl: '',
-        avatarUrl: '',
-        backgroundUrl: '',
-        textStyle: textStyle
-    };
-    
-    enterChat();
+    try {
+        const userCredential = await auth.signInAnonymously();
+        currentUser = userCredential.user.uid;
+        currentUserData = {
+            uid: currentUser,
+            username: username,
+            age: age,
+            gender: gender,
+            role: 'Guest',
+            isGuest: true,
+            email: null,
+            bio: '',
+            coverUrl: '',
+            avatarUrl: '',
+            backgroundUrl: '',
+            textStyle: textStyle
+        };
+        enterChat();
+    } catch (err) {
+        alert('خطأ في تسجيل الزائر: ' + err.message);
+    }
 }
 
 async function loadUserData(uid) {
@@ -289,16 +283,8 @@ function listenForMessages() {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const msgData = change.doc.data();
-                    const existingMessages = document.querySelectorAll('.message');
-                    let exists = false;
-                    
-                    existingMessages.forEach(el => {
-                        if (el.dataset.id === change.doc.id) {
-                            exists = true;
-                        }
-                    });
-                    
-                    if (!exists) {
+                    // تحسين البحث عن تكرار الرسالة بدلاً من اللوب على الكل
+                    if (!document.querySelector(`[data-id="${change.doc.id}"]`)) {
                         addMessageToScreen(msgData, change.doc.id);
                     }
                 }
@@ -307,57 +293,38 @@ function listenForMessages() {
 }
 
 function getEffectAnimation(effect) {
-    switch(effect) {
-        case 'glow-gold': return 'glow-gold';
-        case 'glow-white': return 'glow-white';
-        case 'glow-blue': return 'glow-blue';
-        case 'glow-red': return 'glow-red';
-        case 'glow-green': return 'glow-green';
-        case 'glow-purple': return 'glow-purple';
-        case 'glow-rainbow': return 'glow-rainbow';
-        case 'blink': return 'blink';
-        case 'pulse': return 'pulse';
-        case 'rainbow': return 'rainbow';
-        case 'shake': return 'shake';
-        case 'float': return 'float';
-        case 'bounce': return 'bounce';
-        case 'swing': return 'swing';
-        case 'wobble': return 'wobble';
-        case 'zoom': return 'zoom';
-        case 'flip': return 'flip';
-        case 'slide': return 'slide';
-        case 'fade': return 'fade';
-        case 'rotate': return 'rotate';
-        case 'scale': return 'scale';
-        case 'glitter': return 'glitter';
-        case 'shining': return 'shining';
-        case 'flashing': return 'flashing';
-        case 'color-change': return 'color-change';
-        default: return 'none';
-    }
+    const validEffects = [
+        'glow-gold', 'glow-white', 'glow-blue', 'glow-red', 'glow-green', 'glow-purple', 'glow-rainbow',
+        'blink', 'pulse', 'rainbow', 'shake', 'float', 'bounce', 'swing', 'wobble', 'zoom', 'flip',
+        'slide', 'fade', 'rotate', 'scale', 'glitter', 'shining', 'flashing', 'color-change'
+    ];
+    return validEffects.includes(effect) ? effect : 'none';
 }
 
+// حماية آمنة من ثغرة XSS باستخدام DOM Manipulation
 function addMessageToScreen(msg, id) {
     const div = document.createElement('div');
     div.className = 'message';
     if (id) div.dataset.id = id;
     
-    const time = msg.created_at ? new Date(msg.created_at.seconds * 1000).toLocaleTimeString('ar') : '';
+    const timeStr = msg.created_at ? new Date(msg.created_at.seconds * 1000).toLocaleTimeString('ar') : '';
     
     if (msg.username === 'النظام') {
         div.style.borderRight = '3px solid #4ade80';
         div.style.background = 'rgba(74, 222, 128, 0.1)';
     }
-    
     if (msg.role === 'King') {
         div.style.borderRight = '3px solid #ffd700';
         div.style.background = 'rgba(255, 215, 0, 0.1)';
     }
     
-    let nameStyle = '';
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'username';
+    nameDiv.textContent = `${msg.username} ${msg.role === 'King' ? '👑' : ''}`;
+    
     if (msg.textStyle) {
         const ts = msg.textStyle;
-        nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size}px;color:${ts.color};`;
+        let nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size}px;color:${ts.color};`;
         nameStyle += ts.bg && ts.bg !== 'transparent' ? `background:${ts.bg};` : 'background:transparent;';
         nameStyle += 'padding: 2px 5px; border-radius: 4px;';
         
@@ -373,33 +340,34 @@ function addMessageToScreen(msg, id) {
         if (anim !== 'none') {
             nameStyle += `animation: ${anim} ${3 / (ts.intensity || 5)}s infinite;`;
         }
+        nameDiv.style.cssText = nameStyle;
     }
     
-    div.innerHTML = `
-        <div class="username" style="${nameStyle}">${msg.username} ${msg.role === 'King' ? '👑' : ''}</div>
-        <div class="text">${msg.message}</div>
-        <div class="time">${time}</div>
-    `;
+    const textDiv = document.createElement('div');
+    textDiv.className = 'text';
+    textDiv.textContent = msg.message; // نستخدم textContent لمنع إدخال أكواد خبيثة
+    
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'time';
+    timeDiv.textContent = timeStr;
+    
+    div.appendChild(nameDiv);
+    div.appendChild(textDiv);
+    div.appendChild(timeDiv);
     
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 function copyRoomLink() {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
         alert('تم نسخ رابط الغرفة!');
     });
 }
 
 function toggleMics() {
-    const micsBar = document.getElementById('mics-bar');
-    const mics = micsBar.querySelector('.mics');
-    if (mics.style.display === 'none') {
-        mics.style.display = 'flex';
-    } else {
-        mics.style.display = 'none';
-    }
+    const mics = document.getElementById('mics-bar').querySelector('.mics');
+    mics.style.display = (mics.style.display === 'none') ? 'flex' : 'none';
 }
 
 function toggleMenu(event) {
@@ -463,20 +431,12 @@ function openProfile() {
     }
     
     const coverImg = document.getElementById('cover-img');
-    if (currentUserData.coverUrl) {
-        coverImg.src = currentUserData.coverUrl;
-        coverImg.style.display = 'block';
-    } else {
-        coverImg.style.display = 'none';
-    }
+    coverImg.style.display = currentUserData.coverUrl ? 'block' : 'none';
+    if (currentUserData.coverUrl) coverImg.src = currentUserData.coverUrl;
     
     const bgImg = document.getElementById('bg-img');
-    if (currentUserData.backgroundUrl) {
-        bgImg.src = currentUserData.backgroundUrl;
-        bgImg.style.display = 'block';
-    } else {
-        bgImg.style.display = 'none';
-    }
+    bgImg.style.display = currentUserData.backgroundUrl ? 'block' : 'none';
+    if (currentUserData.backgroundUrl) bgImg.src = currentUserData.backgroundUrl;
     
     profileOverlay.classList.add('show');
 }
@@ -489,7 +449,6 @@ function closeProfile() {
 
 async function saveProfile() {
     const bio = document.getElementById('profile-bio').textContent.trim();
-    
     if (bio.length > 20) {
         alert('التعريف الرمزي 20 حرف كحد أقصى');
         return;
@@ -524,15 +483,12 @@ function closeNameEditDialog() {
 
 function applyNameEdit() {
     const newName = document.getElementById('name-edit-input').value.trim();
-    
     if (newName && newName !== currentUserData.username) {
         currentUserData.username = newName;
         document.getElementById('profile-name').textContent = newName;
         
         if (currentUser && !currentUserData.isGuest) {
-            db.collection('users').doc(currentUser).update({
-                username: newName
-            });
+            db.collection('users').doc(currentUser).update({ username: newName });
         }
     }
     
@@ -561,11 +517,8 @@ function editBio() {
         
         if (newBio !== currentUserData.bio) {
             currentUserData.bio = newBio;
-            
             if (currentUser && !currentUserData.isGuest) {
-                await db.collection('users').doc(currentUser).update({
-                    bio: newBio
-                });
+                await db.collection('users').doc(currentUser).update({ bio: newBio });
             }
         }
     }, { once: true });
@@ -573,11 +526,7 @@ function editBio() {
 
 function toggleOptionsMenu() {
     const menu = document.getElementById('options-menu');
-    if (menu.style.display === 'none') {
-        menu.style.display = 'flex';
-    } else {
-        menu.style.display = 'none';
-    }
+    menu.style.display = (menu.style.display === 'none') ? 'flex' : 'none';
 }
 
 function closeOptionsMenu() {
@@ -602,7 +551,6 @@ function openColorDialog() {
         };
         grid.appendChild(div);
     });
-    
     dialog.style.display = 'block';
 }
 
@@ -640,7 +588,6 @@ function openBgDialog() {
         };
         grid.appendChild(div);
     });
-    
     dialog.style.display = 'block';
 }
 
@@ -683,7 +630,6 @@ function openEffectDialog() {
             effectList.querySelectorAll('.effect-item').forEach(el => el.classList.remove('selected'));
             div.classList.add('selected');
         };
-        
         effectList.appendChild(div);
     });
     
@@ -710,7 +656,6 @@ function openFrameDialog() {
         };
         frameList.appendChild(div);
     });
-    
     document.getElementById('frame-dialog').style.display = 'block';
 }
 
@@ -722,42 +667,21 @@ function closeAllDialogs() {
     document.querySelectorAll('.color-dialog, .dialog').forEach(el => el.style.display = 'none');
 }
 
-function applyColor() {
-    closeColorDialog();
-    saveTextStyle();
-}
-
-function applyBgColor() {
-    closeBgDialog();
-    saveTextStyle();
-}
-
+function applyColor() { closeColorDialog(); saveTextStyle(); }
+function applyBgColor() { closeBgDialog(); saveTextStyle(); }
 function applyFont() {
     textStyle.font = document.getElementById('font-select').value;
     closeFontDialog();
     applyStyleToName();
     saveTextStyle();
 }
-
-function applyEffect() {
-    closeEffectDialog();
-    applyStyleToName();
-    saveTextStyle();
-}
-
-function applyFrame() {
-    closeFrameDialog();
-    applyStyleToName();
-    saveTextStyle();
-}
+function applyEffect() { closeEffectDialog(); applyStyleToName(); saveTextStyle(); }
+function applyFrame() { closeFrameDialog(); applyStyleToName(); saveTextStyle(); }
 
 function saveTextStyle() {
     currentUserData.textStyle = textStyle;
-    
     if (currentUser && !currentUserData.isGuest) {
-        db.collection('users').doc(currentUser).update({
-            textStyle: textStyle
-        });
+        db.collection('users').doc(currentUser).update({ textStyle: textStyle });
     }
 }
 
@@ -765,16 +689,17 @@ function applyStyleToName() {
     const nameEl = document.getElementById('profile-name');
     if (!nameEl) return;
     
-    let css = '';
-    css += `font-family: ${textStyle.font}, sans-serif;`;
-    css += `font-size: ${textStyle.sizeW}px;`;
-    css += `line-height: ${textStyle.sizeH}px;`;
-    css += `color: ${textStyle.color};`;
-    css += `background: transparent;`;
-    css += `border: none;`;
-    css += `box-shadow: none;`;
-    css += `text-shadow: none;`;
-    css += `padding: 0;`;
+    let css = `
+        font-family: ${textStyle.font}, sans-serif;
+        font-size: ${textStyle.sizeW}px;
+        line-height: ${textStyle.sizeH}px;
+        color: ${textStyle.color};
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        text-shadow: none;
+        padding: 0;
+    `;
     
     nameEl.style.cssText = css;
     nameEl.style.animation = 'none';
@@ -814,44 +739,16 @@ function logout() {
 
 let uploadType = '';
 
-function uploadCover() {
-    uploadType = 'cover';
+function triggerUpload(type) {
+    uploadType = type;
     fileInput.value = '';
     fileInput.accept = 'image/*';
     fileInput.click();
 }
 
-function uploadAvatar() {
-    uploadType = 'avatar';
-    fileInput.value = '';
-    fileInput.accept = 'image/*';
-    fileInput.click();
-}
-
-function uploadBackground() {
-    uploadType = 'background';
-    fileInput.value = '';
-    fileInput.accept = 'image/*';
-    fileInput.click();
-}
-
-document.getElementById('cover-upload-btn').addEventListener('click', function() {
-    uploadType = 'cover';
-    fileInput.value = '';
-    fileInput.click();
-});
-
-document.getElementById('avatar-upload-btn').addEventListener('click', function() {
-    uploadType = 'avatar';
-    fileInput.value = '';
-    fileInput.click();
-});
-
-document.getElementById('bg-upload-btn').addEventListener('click', function() {
-    uploadType = 'background';
-    fileInput.value = '';
-    fileInput.click();
-});
+document.getElementById('cover-upload-btn').addEventListener('click', () => triggerUpload('cover'));
+document.getElementById('avatar-upload-btn').addEventListener('click', () => triggerUpload('avatar'));
+document.getElementById('bg-upload-btn').addEventListener('click', () => triggerUpload('background'));
 
 fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -864,10 +761,7 @@ fileInput.addEventListener('change', async (e) => {
     
     const img = new Image();
     const reader = new FileReader();
-    
-    reader.onload = function(event) {
-        img.src = event.target.result;
-    };
+    reader.onload = (event) => { img.src = event.target.result; };
     
     img.onload = async function() {
         const canvas = document.createElement('canvas');
@@ -875,8 +769,7 @@ fileInput.addEventListener('change', async (e) => {
         
         let width = img.width;
         let height = img.height;
-        
-        const maxSize = 1000;
+        const maxSize = 800; // تقليل أبعاد الصورة لتقليل حجم Base64
         
         if (width > maxSize || height > maxSize) {
             if (width > height) {
@@ -892,35 +785,28 @@ fileInput.addEventListener('change', async (e) => {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة لـ 70%
         
+        const updateData = {};
         if (uploadType === 'cover') {
             currentUserData.coverUrl = compressedBase64;
             document.getElementById('cover-img').src = compressedBase64;
             document.getElementById('cover-img').style.display = 'block';
-            
-            await db.collection('users').doc(currentUser).update({
-                coverUrl: compressedBase64
-            });
+            updateData.coverUrl = compressedBase64;
         } else if (uploadType === 'avatar') {
             currentUserData.avatarUrl = compressedBase64;
             document.getElementById('avatar-img').src = compressedBase64;
             document.getElementById('avatar-img').style.display = 'block';
             document.getElementById('avatar-letter').style.display = 'none';
-            
-            await db.collection('users').doc(currentUser).update({
-                avatarUrl: compressedBase64
-            });
+            updateData.avatarUrl = compressedBase64;
         } else {
             currentUserData.backgroundUrl = compressedBase64;
             document.getElementById('bg-img').src = compressedBase64;
             document.getElementById('bg-img').style.display = 'block';
-            
-            await db.collection('users').doc(currentUser).update({
-                backgroundUrl: compressedBase64
-            });
+            updateData.backgroundUrl = compressedBase64;
         }
         
+        await db.collection('users').doc(currentUser).update(updateData);
         alert('تم رفع الصورة!');
     };
     
@@ -931,11 +817,8 @@ fileInput.addEventListener('change', async (e) => {
 async function removeCover() {
     currentUserData.coverUrl = '';
     document.getElementById('cover-img').style.display = 'none';
-    
     if (currentUser && !currentUserData.isGuest) {
-        await db.collection('users').doc(currentUser).update({
-            coverUrl: ''
-        });
+        await db.collection('users').doc(currentUser).update({ coverUrl: '' });
     }
 }
 
@@ -943,22 +826,16 @@ async function removeAvatar() {
     currentUserData.avatarUrl = '';
     document.getElementById('avatar-img').style.display = 'none';
     document.getElementById('avatar-letter').style.display = 'block';
-    
     if (currentUser && !currentUserData.isGuest) {
-        await db.collection('users').doc(currentUser).update({
-            avatarUrl: ''
-        });
+        await db.collection('users').doc(currentUser).update({ avatarUrl: '' });
     }
 }
 
 async function removeBackground() {
     currentUserData.backgroundUrl = '';
     document.getElementById('bg-img').style.display = 'none';
-    
     if (currentUser && !currentUserData.isGuest) {
-        await db.collection('users').doc(currentUser).update({
-            backgroundUrl: ''
-        });
+        await db.collection('users').doc(currentUser).update({ backgroundUrl: '' });
     }
 }
 
@@ -981,7 +858,5 @@ function toggleMemory(event) {
 }
 
 messageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendMessage();
-    }
+    if (e.key === 'Enter') sendMessage();
 });
