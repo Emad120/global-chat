@@ -316,7 +316,7 @@ function addMessageToScreen(msg, id) {
     
     if (msg.textStyle) {
         const ts = msg.textStyle;
-        let nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size}px;color:${ts.color};`;
+        let nameStyle = `font-family:${ts.font};font-size:${Math.round((ts.sizeW || ts.size) * 0.7)}px;color:${ts.color};`;
         nameStyle += ts.bg && ts.bg !== 'transparent' ? `background:${ts.bg};` : 'background:transparent;';
         nameStyle += 'padding: 2px 5px; border-radius: 4px;';
         
