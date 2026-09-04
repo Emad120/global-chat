@@ -29,6 +29,20 @@ const privateRoomItem = document.getElementById('private-room-item');
 const profileOverlay = document.getElementById('profile-overlay');
 const fileInput = document.getElementById('file-input');
 
+let textStyle = {
+    font: 'Cairo',
+    size: 22,
+    color: '#d4af37',
+    bg: 'transparent',
+    border: 'none',
+    bold: false,
+    italic: false,
+    underline: false,
+    shadow: false,
+    effect: 'none',
+    intensity: 5
+};
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -81,6 +95,7 @@ async function registerUser() {
             coverUrl: '',
             avatarUrl: '',
             backgroundUrl: '',
+            textStyle: textStyle,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -158,7 +173,8 @@ async function guestLogin() {
         bio: '',
         coverUrl: '',
         avatarUrl: '',
-        backgroundUrl: ''
+        backgroundUrl: '',
+        textStyle: textStyle
     };
     
     enterChat();
@@ -170,6 +186,10 @@ async function loadUserData(uid) {
         currentUser = uid;
         currentUserData = doc.data();
         currentUserData.uid = uid;
+        
+        if (currentUserData.textStyle) {
+            textStyle = currentUserData.textStyle;
+        }
     }
 }
 
@@ -206,6 +226,7 @@ async function sendMessage() {
             message: text,
             uid: currentUser,
             role: currentUserData.role || 'Guest',
+            textStyle: currentUserData.textStyle || textStyle,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         messageInput.value = '';
@@ -256,8 +277,14 @@ function addMessageToScreen(msg, id) {
         div.style.background = 'rgba(255, 215, 0, 0.1)';
     }
     
+    let nameStyle = '';
+    if (msg.textStyle) {
+        const ts = msg.textStyle;
+        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};`;
+    }
+    
     div.innerHTML = `
-        <div class="username">${msg.username} ${msg.role === 'King' ? '👑' : ''}</div>
+        <div class="username" style="${nameStyle}">${msg.username} ${msg.role === 'King' ? '👑' : ''}</div>
         <div class="text">${msg.message}</div>
         <div class="time">${time}</div>
     `;
@@ -328,6 +355,8 @@ function openProfile() {
     document.getElementById('profile-bio').textContent = currentUserData.bio || '';
     document.getElementById('profile-bio').contentEditable = false;
     
+    applyStyleToName();
+    
     const avatarImg = document.getElementById('avatar-img');
     const avatarLetter = document.getElementById('avatar-letter');
     
@@ -362,6 +391,7 @@ function openProfile() {
 
 function closeProfile() {
     profileOverlay.classList.remove('show');
+    closeTextEditor();
 }
 
 async function saveProfile() {
@@ -373,10 +403,12 @@ async function saveProfile() {
     }
     
     currentUserData.bio = bio;
+    currentUserData.textStyle = textStyle;
     
     if (currentUser && !currentUserData.isGuest) {
         await db.collection('users').doc(currentUser).update({
-            bio: bio
+            bio: bio,
+            textStyle: textStyle
         });
     }
     
@@ -402,6 +434,8 @@ function editName() {
                 });
             }
         }
+        
+        applyStyleToName();
     }, { once: true });
 }
 
@@ -431,6 +465,135 @@ function editBio() {
         }
     }, { once: true });
 }
+
+function openTextEditor() {
+    document.getElementById('text-editor').style.display = 'block';
+    loadTextStyle();
+}
+
+function closeTextEditor() {
+    document.getElementById('text-editor').style.display = 'none';
+}
+
+function loadTextStyle() {
+    document.getElementById('font-select').value = textStyle.font;
+    document.getElementById('font-size').value = textStyle.size;
+    document.getElementById('font-size-value').textContent = textStyle.size;
+    document.getElementById('font-color').value = textStyle.color;
+    document.getElementById('font-bg').value = textStyle.bg === 'transparent' ? '#000000' : textStyle.bg;
+    document.getElementById('border-style').value = textStyle.border;
+    document.getElementById('effect-select').value = textStyle.effect;
+    document.getElementById('effect-intensity').value = textStyle.intensity;
+    document.getElementById('intensity-value').textContent = textStyle.intensity;
+    
+    document.getElementById('bold-btn').classList.toggle('active', textStyle.bold);
+    document.getElementById('italic-btn').classList.toggle('active', textStyle.italic);
+    document.getElementById('underline-btn').classList.toggle('active', textStyle.underline);
+    document.getElementById('shadow-btn').classList.toggle('active', textStyle.shadow);
+}
+
+function toggleBold() {
+    textStyle.bold = !textStyle.bold;
+    document.getElementById('bold-btn').classList.toggle('active', textStyle.bold);
+    applyStyleToName();
+}
+
+function toggleItalic() {
+    textStyle.italic = !textStyle.italic;
+    document.getElementById('italic-btn').classList.toggle('active', textStyle.italic);
+    applyStyleToName();
+}
+
+function toggleUnderline() {
+    textStyle.underline = !textStyle.underline;
+    document.getElementById('underline-btn').classList.toggle('active', textStyle.underline);
+    applyStyleToName();
+}
+
+function toggleShadow() {
+    textStyle.shadow = !textStyle.shadow;
+    document.getElementById('shadow-btn').classList.toggle('active', textStyle.shadow);
+    applyStyleToName();
+}
+
+function applyTextStyle() {
+    textStyle.font = document.getElementById('font-select').value;
+    textStyle.color = document.getElementById('font-color').value;
+    textStyle.bg = document.getElementById('font-bg').value;
+    textStyle.border = document.getElementById('border-style').value;
+    textStyle.effect = document.getElementById('effect-select').value;
+    
+    applyStyleToName();
+    
+    if (currentUser && !currentUserData.isGuest) {
+        db.collection('users').doc(currentUser).update({
+            textStyle: textStyle
+        });
+    }
+    
+    closeTextEditor();
+}
+
+function applyStyleToName() {
+    const nameEl = document.getElementById('profile-name');
+    if (!nameEl) return;
+    
+    let css = '';
+    css += `font-family: ${textStyle.font}, sans-serif;`;
+    css += `font-size: ${textStyle.size}px;`;
+    css += `color: ${textStyle.color};`;
+    css += textStyle.bg !== '#000000' ? `background: ${textStyle.bg};` : 'background: transparent;';
+    css += textStyle.border !== 'none' ? `border: 2px ${textStyle.border} ${textStyle.color};` : 'border: none;';
+    css += textStyle.bold ? 'font-weight: 900;' : 'font-weight: 400;';
+    css += textStyle.italic ? 'font-style: italic;' : 'font-style: normal;';
+    css += textStyle.underline ? 'text-decoration: underline;' : 'text-decoration: none;';
+    css += textStyle.shadow ? 'text-shadow: 2px 2px 4px rgba(0,0,0,0.5);' : '';
+    
+    nameEl.style.cssText = css;
+    
+    nameEl.style.animation = 'none';
+    
+    switch(textStyle.effect) {
+        case 'glow':
+            nameEl.style.textShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
+            break;
+        case 'blink':
+            nameEl.style.animation = `blink ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'pulse':
+            nameEl.style.animation = `pulse ${2 / textStyle.intensity}s infinite`;
+            break;
+        case 'gradient':
+            nameEl.style.background = `linear-gradient(135deg, ${textStyle.color}, #fff, ${textStyle.color})`;
+            nameEl.style.webkitBackgroundClip = 'text';
+            nameEl.style.webkitTextFillColor = 'transparent';
+            break;
+        case 'border-glow':
+            nameEl.style.boxShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
+            break;
+        case 'shake':
+            nameEl.style.animation = `shake ${2 / textStyle.intensity}s infinite`;
+            break;
+        case 'float':
+            nameEl.style.animation = `float ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'rainbow':
+            nameEl.style.animation = `rainbow ${5 / textStyle.intensity}s infinite`;
+            break;
+    }
+}
+
+document.getElementById('font-size').addEventListener('input', function() {
+    textStyle.size = this.value;
+    document.getElementById('font-size-value').textContent = this.value;
+    applyStyleToName();
+});
+
+document.getElementById('effect-intensity').addEventListener('input', function() {
+    textStyle.intensity = this.value;
+    document.getElementById('intensity-value').textContent = this.value;
+    applyStyleToName();
+});
 
 function logout() {
     auth.signOut();
@@ -481,7 +644,7 @@ fileInput.addEventListener('change', async (e) => {
         let width = img.width;
         let height = img.height;
         
-        const maxSize = 800;
+        const maxSize = 1000;
         
         if (width > maxSize || height > maxSize) {
             if (width > height) {
@@ -497,7 +660,7 @@ fileInput.addEventListener('change', async (e) => {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
         
         if (uploadType === 'cover') {
             currentUserData.coverUrl = compressedBase64;
