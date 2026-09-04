@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎙️ اختبار الصوت - قمر الشام</title>
+    <title>🎙️ اختبار الصوت</title>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -48,7 +48,6 @@
 <body>
     <div class="test-box">
         <h2>🎙️ اختبار الصوت</h2>
-        <p>App ID: b8f3b3e1c00c420f82e6d047b2f9bd88</p>
         <button id="join-btn" onclick="joinMic()">انضمام للمايك</button>
         <button id="leave-btn" class="leave" onclick="leaveMic()" style="display:none;">مغادرة</button>
         <div id="status">جاهز</div>
@@ -56,7 +55,8 @@
 
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js"></script>
     <script>
-        const APP_ID = 'b8f3b3e1c00c420f82e6d047b2f9bd88';
+        const APP_ID = 'c0613e123a9f42efa9e899634123435e';
+        const TOKEN = '007eJxTYHBJPMmddT/glcAK5/Lg39NiGI5NE/uhemq3Bcu7r2v37/JQYEg2MDM0TjU0Mk60TDMxSk1LtEy1sLQ0MzYBCpkYm6Z6K8zOaghkZLjwt5+BEQpBfE6GktTiEt2i/PxcBgYAC5kh7Q==';
         let client = null;
         let localTrack = null;
 
@@ -66,7 +66,7 @@
                 
                 document.getElementById('status').textContent = 'جاري الاتصال...';
                 
-                await client.join(APP_ID, 'test-room', null, null);
+                await client.join(APP_ID, 'test-room', TOKEN, null);
                 
                 localTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 await client.publish([localTrack]);
@@ -80,10 +80,6 @@
                         await client.subscribe(user, mediaType);
                         user.audioTrack.play();
                     }
-                });
-                
-                client.on('user-unpublished', (user) => {
-                    document.getElementById('status').textContent = '🔇 مستخدم غادر';
                 });
                 
             } catch (err) {
