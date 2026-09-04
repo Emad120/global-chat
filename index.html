@@ -3,302 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌙 قمر الشام - منصة الشات الملكية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Lateef:wght@400;700&family=Scheherazade+New:wght@400;700&family=Markazi+Text:wght@400;700&family=Harmattan:wght@400;700&family=Jomhuria&family=Lalezar&display=swap" rel="stylesheet">
+    <title>قمر الشام</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-    <div class="background-pattern"></div>
-    
-    <div class="container">
-        <div class="login-screen" id="login-screen">
-            <div class="login-box">
-                <div class="logo">
-                    <div class="logo-icon">🌙</div>
-                    <h1>قمر الشام</h1>
-                    <p>منصة الشات الملكية الفاخرة</p>
-                </div>
-                
-                <div class="login-tabs">
-                    <button class="tab-btn active" onclick="switchTab('login')">دخول</button>
-                    <button class="tab-btn" onclick="switchTab('register')">تسجيل</button>
-                    <button class="tab-btn" onclick="switchTab('guest')">زائر</button>
-                </div>
-                
-                <div class="tab-content" id="tab-login">
-                    <div class="input-group">
-                        <label>👤 الاسم أو الإيميل</label>
-                        <input type="text" id="login-username" placeholder="اكتب اسمك أو إيميلك...">
-                    </div>
-                    <div class="input-group">
-                        <label>🔑 كلمة السر</label>
-                        <input type="password" id="login-password" placeholder="كلمة السر...">
-                    </div>
-                    <button class="btn-primary" onclick="loginUser()">
-                        <span>دخول</span>
-                        <span>🚪</span>
-                    </button>
-                </div>
-                
-                <div class="tab-content" id="tab-register" style="display:none">
-                    <div class="input-group">
-                        <label>👤 الاسم</label>
-                        <input type="text" id="reg-username" placeholder="اسمك...">
-                    </div>
-                    <div class="input-group">
-                        <label>📧 الإيميل</label>
-                        <input type="email" id="reg-email" placeholder="example@email.com">
-                    </div>
-                    <div class="input-group">
-                        <label>🔑 كلمة السر</label>
-                        <input type="password" id="reg-password" placeholder="كلمة السر...">
-                    </div>
-                    <div class="input-group">
-                        <label>🔑 تأكيد كلمة السر</label>
-                        <input type="password" id="reg-confirm" placeholder="أعد كلمة السر...">
-                    </div>
-                    <button class="btn-primary" onclick="registerUser()">
-                        <span>تسجيل</span>
-                        <span>📝</span>
-                    </button>
-                </div>
-                
-                <div class="tab-content" id="tab-guest" style="display:none">
-                    <div class="input-group">
-                        <label>👤 الاسم</label>
-                        <input type="text" id="guest-username" placeholder="اسمك...">
-                    </div>
-                    <div class="input-group">
-                        <label>🎂 العمر</label>
-                        <input type="number" id="guest-age" placeholder="عمرك..." min="10" max="99">
-                    </div>
-                    <div class="input-group">
-                        <label>⚧️ الجنس</label>
-                        <select id="guest-gender">
-                            <option value="male">ذكر</option>
-                            <option value="female">أنثى</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" onclick="guestLogin()">
-                        <span>دخول كزائر</span>
-                        <span>👤</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+
+    <!-- مدخلات رفع الصور المخفية المرتبطة بالـ Labels -->
+    <input type="file" id="cover-file-input" accept="image/*" style="display: none !important;">
+    <input type="file" id="avatar-file-input" accept="image/*" style="display: none !important;">
+    <input type="file" id="bg-file-input" accept="image/*" style="display: none !important;">
+
+    <!-- الحاوية الرئيسية للتطبيق -->
+    <div class="app-container">
         
-        <div class="chat-screen" id="chat-screen" style="display:none">
-            <div class="header">
-                <button class="btn-icon" onclick="toggleRooms(event)">📂</button>
-                <h3 id="room-title">🌙 قمر الشام - الروم العام</h3>
-                <div class="header-actions">
-                    <button class="btn-icon" onclick="toggleNotifications(event)">🔔</button>
-                    <button class="btn-icon" onclick="togglePrivate(event)">💬</button>
-                    <button class="btn-icon" id="memory-btn" style="display:none" onclick="toggleMemory(event)">🧠</button>
-                    <button class="btn-icon" onclick="toggleProfile(event)">👤</button>
-                    <button class="btn-icon" onclick="toggleMenu(event)">☰</button>
+        <!-- واجهة البروفايل (Profile Card) -->
+        <div id="profile-modal" class="profile-card">
+            
+            <!-- أزرار الإغلاق والخيارات الفائقة الشفافية -->
+            <button type="button" class="btn-icon btn-close" onclick="closeProfile()">✕</button>
+            <button type="button" class="btn-icon btn-options" onclick="toggleOptions()">⚙️</button>
+
+            <!-- 1. غلاف البروفايل (270px) -->
+            <div class="cover-wrapper">
+                <img id="cover-img" src="" alt="غلاف" style="display:none;">
+                <div class="img-actions cover-actions">
+                    <label for="cover-file-input" class="action-btn" title="تغيير الغلاف">📷</label>
+                    <button type="button" class="action-btn remove-btn" onclick="removeImage('cover')" title="إزالة الغلاف">✕</button>
                 </div>
             </div>
-            
-            <div class="mics-bar" id="mics-bar">
-                <div class="mics">
-                    <div class="mic" id="mic1">🎙️</div>
-                    <div class="mic" id="mic2">🎙️</div>
-                    <div class="mic" id="mic3">🎙️</div>
-                    <div class="mic" id="mic4">🎙️</div>
-                </div>
-                <button class="btn-icon" onclick="toggleMics()">▼</button>
-            </div>
-            
-            <div class="main-content">
-                <div class="messages" id="messages"></div>
-            </div>
-            
-            <div class="input-area">
-                <button class="btn-icon" onclick="copyRoomLink()">🔗</button>
-                <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
-                <button class="btn-send" onclick="sendMessage()">إرسال 📨</button>
-            </div>
-        </div>
-    </div>
 
-    <div class="profile-overlay" id="profile-overlay">
-        <div class="profile-box">
-            <button class="btn-close" onclick="closeProfile()">✕</button>
-            
-            <div class="profile-cover" id="profile-cover">
-                <img id="cover-img" style="display:none" alt="الغلاف">
-            </div>
-            
-            <div class="profile-toolbar">
-                <button class="toolbar-btn" onclick="toggleOptionsMenu()">⚙️ خيارات</button>
-            </div>
-            
-            <div class="options-menu" id="options-menu" style="display:none">
-                <button class="option-item" onclick="openColorDialog()">🎨 لون الاسم</button>
-                <button class="option-item" onclick="openBgDialog()">🖼️ خلفية الاسم</button>
-                <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
-                <button class="option-item" onclick="openEffectDialog()">✨ حركة</button>
-                <button class="option-item" onclick="openFrameDialog()">🔲 إطارات متوهجة</button>
-            </div>
-            
-            <div class="cover-buttons">
-                <button class="btn-cover-camera" onclick="triggerUpload('cover')">📷</button>
-                <button class="btn-cover-remove" onclick="removeCover()">✕</button>
-            </div>
-            
-            <div class="profile-avatar-container">
-                <div class="profile-avatar" id="profile-avatar">
-                    <img id="avatar-img" style="display:none" alt="الصورة الشخصية">
-                    <span id="avatar-letter"></span>
+            <!-- 2. الصورة الشخصية (104px تتوسط الغلاف) -->
+            <div class="avatar-wrapper">
+                <div id="avatar-box" class="avatar-box">
+                    <img id="avatar-img" src="" alt="الصورة الشخصية" style="display:none;">
+                    <span id="avatar-letter" class="avatar-letter">ع</span>
                 </div>
-                <button class="btn-camera" onclick="triggerUpload('avatar')">📷</button>
-                <button class="btn-remove" onclick="removeAvatar()">✕</button>
-            </div>
-            
-            <div class="profile-info">
-                <div class="name-row">
-                    <h2 id="profile-name"></h2>
-                    <button class="btn-edit" onclick="editName()">✏️</button>
-                </div>
-                <div class="bio-row">
-                    <p class="profile-bio" id="profile-bio" contenteditable="true">اضغط لكتابة تعريف رمزي...</p>
-                    <button class="btn-edit" onclick="editBio()">✏️</button>
+                <div class="img-actions avatar-actions">
+                    <label for="avatar-file-input" class="action-btn" title="تغيير الصورة">📷</label>
+                    <button type="button" class="action-btn remove-btn" onclick="removeImage('avatar')" title="إزالة الصورة">✕</button>
                 </div>
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="profile-background">
-                <div class="bg-actions">
-                    <button class="btn-camera" onclick="triggerUpload('background')">📷</button>
-                    <button class="btn-remove" onclick="removeBackground()">✕</button>
+
+            <!-- 3. خلفية البروفايل والبيانات -->
+            <div id="profile-bg-layer" class="profile-bg-layer">
+                <div class="img-actions bg-actions">
+                    <label for="bg-file-input" class="action-btn" title="تغيير الخلفية">📷</label>
+                    <button type="button" class="action-btn remove-btn" onclick="removeImage('background')" title="إزالة الخلفية">✕</button>
                 </div>
-                <img id="bg-img" style="display:none" alt="الخلفية">
+
+                <!-- الاسم والتعريف الرمزي -->
+                <div class="user-info-section">
+                    <div class="name-edit-row">
+                        <input type="text" id="profile-display-name" value="عماد" readonly>
+                        <button type="button" class="btn-icon-inline" onclick="toggleNameEdit()">✏️</button>
+                    </div>
+                    
+                    <div class="bio-row">
+                        <input type="text" id="profile-bio" maxlength="20" placeholder="التعريف الرمزي (20 حرف كحد أقصى)...">
+                    </div>
+                </div>
+
+                <!-- لوحة التخصيص (تظهر بضغط ⚙️) -->
+                <div id="customization-panel" class="customization-panel" style="display:none;">
+                    <div class="control-group">
+                        <label>عرض الاسم</label>
+                        <input type="range" id="name-width-range" min="50" max="200" value="100">
+                    </div>
+                    <div class="control-group">
+                        <label>طول الاسم</label>
+                        <input type="range" id="name-height-range" min="50" max="200" value="100">
+                    </div>
+                    
+                    <div class="options-grid">
+                        <button type="button" onclick="openFontPicker()">الخطوط (10)</button>
+                        <button type="button" onclick="openColorPicker('text')">لون الاسم (50)</button>
+                        <button type="button" onclick="openColorPicker('bg')">خلفية الاسم (شات)</button>
+                        <button type="button" onclick="openEffectsPicker()">التأثيرات (22)</button>
+                        <button type="button" onclick="openFramesPicker()">الإطارات (شات)</button>
+                    </div>
+                </div>
+
+                <!-- زر الحفظ أقصى اليمين السفلي شبه شفاف -->
+                <button type="button" class="btn-save-bottom" onclick="saveProfile()">💾 حفظ</button>
             </div>
-            
-            <div class="profile-actions">
-                <button class="btn-secondary" onclick="saveProfile()">💾 حفظ</button>
-            </div>
         </div>
+
+        <!-- منطقة الشات التجريبية -->
+        <div class="chat-box" id="chat-messages"></div>
+        <div class="input-bar">
+            <input type="text" id="chat-input" placeholder="اكتب رسالة...">
+            <button onclick="sendMessage()">إرسال</button>
+        </div>
+
     </div>
 
-    <div class="color-dialog" id="color-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>🎨 لون الاسم</h4>
-                <button onclick="closeColorDialog()">✕</button>
-            </div>
-            <div class="color-grid" id="color-grid"></div>
-            <button class="btn-apply" onclick="applyColor()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="color-dialog" id="bg-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>🖼️ خلفية الاسم</h4>
-                <button onclick="closeBgDialog()">✕</button>
-            </div>
-            <div class="color-grid" id="bg-color-grid"></div>
-            <button class="btn-apply" onclick="applyBgColor()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="dialog" id="font-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>✍️ خط الاسم</h4>
-                <button onclick="closeFontDialog()">✕</button>
-            </div>
-            <select id="font-select">
-                <option value="Cairo">Cairo</option>
-                <option value="Amiri">Amiri</option>
-                <option value="Reem Kufi">Reem Kufi</option>
-                <option value="Aref Ruqaa">Aref Ruqaa</option>
-                <option value="Lateef">Lateef</option>
-                <option value="Scheherazade New">Scheherazade New</option>
-                <option value="Markazi Text">Markazi Text</option>
-                <option value="Harmattan">Harmattan</option>
-                <option value="Jomhuria">Jomhuria</option>
-                <option value="Lalezar">Lalezar</option>
-            </select>
-            <button class="btn-apply" onclick="applyFont()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="dialog" id="effect-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>✨ حركة</h4>
-                <button onclick="closeEffectDialog()">✕</button>
-            </div>
-            <div class="effect-list" id="effect-list"></div>
-            <button class="btn-apply" onclick="applyEffect()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="dialog" id="frame-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>🔲 إطارات متوهجة</h4>
-                <button onclick="closeFrameDialog()">✕</button>
-            </div>
-            <div class="frame-list" id="frame-list"></div>
-            <button class="btn-apply" onclick="applyFrame()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="dialog" id="name-edit-dialog" style="display:none">
-        <div class="dialog-content">
-            <div class="dialog-header">
-                <h4>✏️ تعديل الاسم</h4>
-                <button onclick="closeNameEditDialog()">✕</button>
-            </div>
-            <input type="text" id="name-edit-input" maxlength="20" placeholder="الاسم...">
-            <label>عرض الخط</label>
-            <input type="range" id="name-width-range" min="10" max="40" value="22">
-            <span id="name-width-value">22</span>
-            <label>طول الخط</label>
-            <input type="range" id="name-height-range" min="10" max="40" value="22">
-            <span id="name-height-value">22</span>
-            <button class="btn-apply" onclick="applyNameEdit()">تطبيق</button>
-        </div>
-    </div>
-
-    <div class="sidebar left-sidebar" id="left-sidebar">
-        <div class="sidebar-header">
-            <h3>القائمة</h3>
-            <button class="btn-close" onclick="closeSidebar('left-sidebar')">✕</button>
-        </div>
-        <div class="sidebar-content">
-            <button class="sidebar-item" onclick="showAlert('تفاعل الرومات - قريباً')">🏠 تفاعل الرومات</button>
-            <button class="sidebar-item" onclick="showAlert('تفاعل الأعضاء - قريباً')">👥 تفاعل الأعضاء</button>
-            <button class="sidebar-item" onclick="showAlert('تفاعل العائلات - قريباً')">👨‍👩‍👧‍👦 تفاعل العائلات</button>
-            <button class="sidebar-item" id="memory-sidebar-item" style="display:none" onclick="toggleMemory(event)">🧠 ذاكرة البوت</button>
-            <button class="sidebar-item" onclick="showAlert('حائط النشر العام - قريباً')">📢 حائط نشر عام</button>
-            <button class="sidebar-item" onclick="showAlert('حائط نشر الأصدقاء - قريباً')">💬 حائط نشر الأصدقاء</button>
-        </div>
-    </div>
-
-    <div class="sidebar right-sidebar" id="right-sidebar">
-        <div class="sidebar-header">
-            <h3>الرومات</h3>
-            <button class="btn-close" onclick="closeSidebar('right-sidebar')">✕</button>
-        </div>
-        <div class="sidebar-content">
-            <button class="sidebar-item active" onclick="showAlert('الروم العام')">🌙 الروم العام</button>
-            <button class="sidebar-item" id="private-room-item" style="display:none" onclick="showAlert('الروم الخاص مع البوت')">🤖 الروم الخاص مع البوت</button>
-        </div>
-    </div>
-
-    <div class="overlay" id="overlay" onclick="closeAllSidebars()"></div>
-    
-    <input type="file" id="file-input" style="opacity:0;position:absolute;width:1px;height:1px;" accept="image/*">
-
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
