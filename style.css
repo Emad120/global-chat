@@ -442,7 +442,7 @@ body {
     max-width: 400px;
     height: 90vh;
     min-height: 500px;
-    overflow-y: auto;
+    overflow: hidden;
     background: #1a1a1a;
     border-radius: 15px;
     border: 1px solid rgba(212, 175, 55, 0.3);
@@ -458,15 +458,16 @@ body {
     z-index: 50;
 }
 
+/* صورة الغلاف - بارتفاع 33% ومطابقة للحد العشري */
 .profile-cover {
     width: 100%;
-    height: 600px;
+    height: 33vh;
     background: linear-gradient(135deg, #d4af37 0%, #8b6914 100%);
     position: relative;
     flex-shrink: 0;
     z-index: 2;
-    border-bottom: 3px solid #d4af37;
-    margin-top: -120px;
+    border-bottom: none;
+    margin-top: 0;
 }
 
 .profile-cover img {
@@ -518,7 +519,7 @@ body {
     position: relative;
     z-index: 50;
     display: flex;
-    padding: 30px 10px 10px 10px;
+    padding: 10px;
     background: transparent;
     justify-content: flex-start;
     flex-shrink: 0;
@@ -536,9 +537,10 @@ body {
     pointer-events: auto;
 }
 
+/* قائمة/زر الخيارات أعلى خلفية البروفايل مباشرة */
 .options-menu {
     position: absolute;
-    top: 520px;
+    top: 0;
     right: 10px;
     z-index: 60;
     background: #1a1a1a;
@@ -571,7 +573,7 @@ body {
 .profile-avatar-container {
     display: flex;
     justify-content: center;
-    margin-top: -250px;
+    margin-top: -50px;
     position: relative;
     z-index: 3;
 }
@@ -707,7 +709,7 @@ body {
     text-align: center;
     position: relative;
     z-index: 3;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .profile-info h2 {
@@ -733,6 +735,7 @@ body {
     border-radius: 3px;
 }
 
+/* خلفية البروفايل - ملاصقة تماماً للغلاف وبدون أي فواصل سوداء */
 .profile-background {
     flex: 1;
     position: relative;
@@ -740,7 +743,6 @@ body {
     overflow: hidden;
     margin: 0;
     padding: 0;
-    min-height: 150px;
     width: 100%;
 }
 
