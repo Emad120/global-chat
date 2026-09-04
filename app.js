@@ -308,7 +308,9 @@ function addMessageToScreen(msg, id) {
     let nameStyle = '';
     if (msg.textStyle) {
         const ts = msg.textStyle;
-        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};background:transparent;`;
+        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};`;
+        nameStyle += ts.bg && ts.bg !== 'transparent' ? `background:${ts.bg};` : 'background:transparent;';
+        nameStyle += 'padding: 2px 5px; border-radius: 4px;';
         
         switch(ts.effect) {
             case 'glow':
@@ -730,11 +732,13 @@ function applyStyleToName() {
     css += `font-size: ${textStyle.size}px;`;
     css += `color: ${textStyle.color};`;
     css += `background: transparent;`;
+    css += `border: none;`;
+    css += `box-shadow: none;`;
+    css += `text-shadow: none;`;
+    css += `padding: 0;`;
     
     nameEl.style.cssText = css;
     nameEl.style.animation = 'none';
-    nameEl.style.boxShadow = 'none';
-    nameEl.style.border = 'none';
     
     switch(textStyle.effect) {
         case 'glow':
@@ -790,10 +794,6 @@ function applyStyleToName() {
             break;
         case 'flashing':
             nameEl.style.animation = `flashing ${2 / textStyle.intensity}s infinite`;
-            break;
-        case 'border-glow':
-            nameEl.style.border = `2px solid ${textStyle.color}`;
-            nameEl.style.boxShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
             break;
     }
 }
