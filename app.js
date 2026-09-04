@@ -85,6 +85,15 @@ const frames = [
     { value: 'purple', label: 'إطار بنفسجي متوهج' }
 ];
 
+// سيرفرات PeerJS المتعددة
+const PEER_SERVERS = [
+    { host: '0.peerjs.com', port: 443, secure: true, path: '/' },
+    { host: 'peerjs.vercel.app', port: 443, secure: true, path: '/' },
+    { host: 'peerjs-server.herokuapp.com', port: 443, secure: true, path: '/' }
+];
+
+let currentServerIndex = 0;
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -919,7 +928,9 @@ let myPeerId = null;
 function initPeer() {
     if (peer) return;
     
-    peer = new Peer();
+    const config = PEER_SERVERS[currentServerIndex];
+    
+    peer = new Peer(undefined, config);
     
     peer.on('open', (id) => {
         myPeerId = id;
@@ -949,7 +960,17 @@ function initPeer() {
     });
     
     peer.on('error', (err) => {
-        console.error('PeerJS Error:', err);
+        console.error('PeerJS Error:', err.message);
+        
+        if (err.type === 'network' || err.type === 'server-error' || err.type === 'peer-unavailable') {
+            if (currentServerIndex < PEER_SERVERS.length - 1) {
+                currentServerIndex++;
+                peer.destroy();
+                peer = null;
+                myPeerId = null;
+                initPeer();
+            }
+        }
     });
 }
 
@@ -988,7 +1009,6 @@ function listenForMics() {
                 micEl.textContent = micData.username.charAt(0);
             }
             
-            // الاتصال التلقائي
             if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
                 setTimeout(() => {
                     connectToPeer(micData.peerId);
