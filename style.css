@@ -458,6 +458,59 @@ body {
     z-index: 50;
 }
 
+.profile-toolbar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 50;
+    display: flex;
+    gap: 5px;
+}
+
+.toolbar-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.5);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    pointer-events: auto;
+}
+
+.options-menu {
+    position: absolute;
+    top: 45px;
+    right: 10px;
+    z-index: 60;
+    background: #1a1a1a;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 150px;
+}
+
+.option-item {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    text-align: right;
+    pointer-events: auto;
+}
+
+.option-item:hover {
+    background: rgba(212, 175, 55, 0.2);
+}
+
 .profile-cover {
     width: 100%;
     height: 270px;
@@ -476,9 +529,9 @@ body {
 
 .cover-buttons {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 100;
+    top: 45px;
+    left: 10px;
+    z-index: 50;
     display: flex;
     gap: 10px;
 }
@@ -599,13 +652,6 @@ body {
     transform: translateY(-50%);
 }
 
-.name-row .btn-style {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
 .bio-row {
     display: flex;
     align-items: center;
@@ -638,17 +684,6 @@ body {
     font-size: 12px;
 }
 
-.btn-style {
-    width: 25px;
-    height: 25px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(212, 175, 55, 0.3);
-    color: #fff;
-    cursor: pointer;
-    font-size: 12px;
-}
-
 .profile-info {
     padding: 0 15px;
     text-align: center;
@@ -660,7 +695,6 @@ body {
 .profile-info h2 {
     color: #d4af37;
     font-size: 22px;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
 .profile-bio {
@@ -729,14 +763,15 @@ body {
     font-size: 11px;
 }
 
-.text-editor {
+.color-dialog,
+.dialog {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
-    max-width: 350px;
-    max-height: 85vh;
+    max-width: 320px;
+    max-height: 80vh;
     overflow-y: auto;
     background: #1a1a1a;
     border-radius: 15px;
@@ -745,18 +780,24 @@ body {
     padding: 15px;
 }
 
-.editor-header {
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialog-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
 }
 
-.editor-header h4 {
+.dialog-header h4 {
     color: #d4af37;
+    font-size: 14px;
 }
 
-.editor-header button {
+.dialog-header button {
     width: 25px;
     height: 25px;
     border: none;
@@ -767,26 +808,27 @@ body {
     font-size: 12px;
 }
 
-.editor-content {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
 }
 
-.editor-section {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.color-item {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    pointer-events: auto;
 }
 
-.editor-section label {
-    color: #d4af37;
-    font-size: 12px;
+.color-item.selected {
+    border-color: #fff;
 }
 
-.editor-section select,
-.editor-section input[type="color"],
-.editor-section input[type="range"] {
+.dialog select,
+.dialog input[type="range"] {
     padding: 8px;
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 8px;
@@ -794,28 +836,6 @@ body {
     color: #fff;
     font-family: 'Cairo', sans-serif;
     width: 100%;
-}
-
-.style-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.style-buttons button {
-    width: 35px;
-    height: 35px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.style-buttons button.active {
-    background: #d4af37;
-    color: #000;
 }
 
 .btn-apply {
