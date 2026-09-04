@@ -285,10 +285,7 @@ function addMessageToScreen(msg, id) {
     let nameStyle = '';
     if (msg.textStyle) {
         const ts = msg.textStyle;
-        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};`;
-        if (ts.bg && ts.bg !== 'transparent') {
-            nameStyle += `background:${ts.bg};`;
-        }
+        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};background:transparent;`;
     }
     
     div.innerHTML = `
@@ -520,6 +517,18 @@ function openBgDialog() {
     const grid = document.getElementById('bg-color-grid');
     grid.innerHTML = '';
     
+    const transparentDiv = document.createElement('div');
+    transparentDiv.className = 'color-item';
+    transparentDiv.style.background = 'transparent';
+    transparentDiv.style.border = '2px dashed #fff';
+    transparentDiv.onclick = function() {
+        textStyle.bg = 'transparent';
+        grid.querySelectorAll('.color-item').forEach(el => el.classList.remove('selected'));
+        transparentDiv.classList.add('selected');
+        applyStyleToName();
+    };
+    grid.appendChild(transparentDiv);
+    
     colors.forEach(color => {
         const div = document.createElement('div');
         div.className = 'color-item';
@@ -627,10 +636,12 @@ function applyStyleToName() {
     css += `font-family: ${textStyle.font}, sans-serif;`;
     css += `font-size: ${textStyle.size}px;`;
     css += `color: ${textStyle.color};`;
-    css += textStyle.bg && textStyle.bg !== 'transparent' ? `background: ${textStyle.bg};` : 'background: transparent;';
+    css += `background: transparent;`;
     
     nameEl.style.cssText = css;
     nameEl.style.animation = 'none';
+    nameEl.style.boxShadow = 'none';
+    nameEl.style.border = 'none';
     
     switch(textStyle.effect) {
         case 'glow':
@@ -650,6 +661,10 @@ function applyStyleToName() {
             break;
         case 'float':
             nameEl.style.animation = `float ${3 / textStyle.intensity}s infinite`;
+            break;
+        case 'border-glow':
+            nameEl.style.border = `2px solid ${textStyle.color}`;
+            nameEl.style.boxShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
             break;
     }
 }
@@ -823,4 +838,4 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         sendMessage();
     }
-});ح
+});
