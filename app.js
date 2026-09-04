@@ -246,6 +246,7 @@ function enterChat() {
     }
     
     listenForMessages();
+    listenForMics();
     
     db.collection('messages').add({
         username: 'النظام',
@@ -253,7 +254,6 @@ function enterChat() {
         created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    // تشغيل PeerJS بعد الدخول
     setTimeout(() => {
         initPeer();
     }, 1000);
@@ -914,6 +914,7 @@ let peer = null;
 let myStream = null;
 let joinedMicNumber = null;
 let activeCalls = {};
+let myPeerId = null;
 
 function initPeer() {
     if (peer) return;
@@ -921,7 +922,15 @@ function initPeer() {
     peer = new Peer();
     
     peer.on('open', (id) => {
+        myPeerId = id;
         console.log('My Peer ID:', id);
+        
+        // تحديث حالة المستخدم
+        if (currentUser) {
+            db.collection('users').doc(currentUser).update({
+                peerId: id
+            });
+        }
     });
     
     peer.on('call', async (call) => {
@@ -938,6 +947,29 @@ function initPeer() {
             audio.srcObject = remoteStream;
             audio.play().catch(() => {});
         });
+        
+        activeCalls[call.peer] = call;
+    });
+}
+
+// مزامنة حالة المايكات
+function listenForMics() {
+    db.collection('mics').orderBy('micNumber').onSnapshot((snapshot) => {
+        // تصفير كل المايكات
+        for (let i = 1; i <= 4; i++) {
+            const micEl = document.getElementById('mic' + i);
+            micEl.classList.remove('taken');
+            micEl.textContent = '🎙️';
+        }
+        
+        snapshot.forEach((doc) => {
+            const micData = doc.data();
+            const micEl = document.getElementById('mic' + micData.micNumber);
+            if (micEl) {
+                micEl.classList.add('taken');
+                micEl.textContent = micData.username.charAt(0);
+            }
+        });
     });
 }
 
@@ -947,56 +979,6 @@ async function joinMic(micNumber) {
         return;
     }
     
-    if (joinedMicNumber === micNumber) {
-        await leaveMic();
-        return;
-    }
-    
-    if (joinedMicNumber) {
-        await leaveMic();
-    }
-    
-    try {
-        if (!peer) initPeer();
-        
-        myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        joinedMicNumber = micNumber;
-        
-        const micEl = document.getElementById('mic' + micNumber);
-        micEl.classList.add('taken');
-        micEl.textContent = currentUserData.username.charAt(0);
-        
-        alert('✅ انضممت للمايك ' + micNumber);
-        
-    } catch (err) {
-        alert('❌ خطأ: ' + err.message);
-    }
-}
-
-async function leaveMic() {
-    if (!joinedMicNumber) return;
-    
-    try {
-        if (myStream) {
-            myStream.getTracks().forEach(track => track.stop());
-            myStream = null;
-        }
-        
-        Object.values(activeCalls).forEach(call => call.close());
-        activeCalls = {};
-        
-        const micEl = document.getElementById('mic' + joinedMicNumber);
-        micEl.classList.remove('taken');
-        micEl.textContent = '🎙️';
-        
-        alert('غادرت المايك');
-        joinedMicNumber = null;
-    } catch (err) {
-        alert('❌ خطأ: ' + err.message);
-    }
-}
-
-document.getElementById('mic1').addEventListener('click', () => joinMic(1));
-document.getElementById('mic2').addEventListener('click', () => joinMic(2));
-document.getElementById('mic
+    // تأكد إن المايك فاضي
+    const micDoc = await db.collection('mics').doc('mic' + micNumber).get();
+    if (micDoc.exists && micDoc.data().userId
