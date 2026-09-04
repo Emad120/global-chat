@@ -493,6 +493,9 @@ body {
     cursor: pointer;
     font-size: 18px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-cover-remove {
@@ -505,6 +508,63 @@ body {
     cursor: pointer;
     font-size: 16px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-toolbar {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    padding: 10px;
+    background: transparent;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.toolbar-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #d4af37;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    pointer-events: auto;
+}
+
+.options-menu {
+    position: absolute;
+    top: 310px;
+    right: 10px;
+    z-index: 60;
+    background: #1a1a1a;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 150px;
+}
+
+.option-item {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    text-align: right;
+    pointer-events: auto;
+}
+
+.option-item:hover {
+    background: rgba(212, 175, 55, 0.2);
 }
 
 .profile-avatar-container {
@@ -546,6 +606,9 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .profile-avatar-container .btn-remove {
@@ -553,6 +616,9 @@ body {
     bottom: 5px;
     left: calc(50% - 45px);
     z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-camera {
@@ -565,6 +631,9 @@ body {
     cursor: pointer;
     font-size: 14px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-remove {
@@ -577,6 +646,9 @@ body {
     cursor: pointer;
     font-size: 12px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .name-row {
@@ -687,6 +759,7 @@ body {
     z-index: 100;
     display: flex;
     gap: 10px;
+    background: transparent;
 }
 
 .profile-actions {
