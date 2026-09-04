@@ -1,18 +1,28 @@
-const SUPABASE_URL = 'https://eqlfuyvndvpmmzfthacr.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxbGZ1eXZuZHZwbW1temZ0aGFjciIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjIwMTU3NjAwMDB9.placeholder';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const firebaseConfig = {
+  apiKey: "AIzaSyAGbS9KHTdS_t2TEfaemKEWvXCmSQBZgio",
+  authDomain: "qamar-chat-811a5.firebaseapp.com",
+  projectId: "qamar-chat-811a5",
+  storageBucket: "qamar-chat-811a5.firebasestorage.app",
+  messagingSenderId: "469638501074",
+  appId: "1:469638501074:web:fc0f049efe35dc914e930b"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// إزالة كلمة السر والبيانات الحساسة من المتصفح لعدم الاختراق
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
 const OWNER_USERNAME = 'Emad';
 
 let currentUser = null;
 let currentUserData = null;
-let messageSubscription = null;
 
 const loginScreen = document.getElementById('login-screen');
 const chatScreen = document.getElementById('chat-screen');
 const messagesDiv = document.getElementById('messages');
 const messageInput = document.getElementById('message-input');
+const roomTitle = document.getElementById('room-title');
 const memoryBtn = document.getElementById('memory-btn');
 const memorySidebarItem = document.getElementById('memory-sidebar-item');
 const privateRoomItem = document.getElementById('private-room-item');
@@ -31,7 +41,7 @@ let textStyle = {
 };
 
 const colors = [
-    '#d4af37', '#ffd700', '#ffffff', '#000000', '#ff0000', '#ff6b6b', '#ff9f43', '#feca57',
+    '#d4af37', '#ffd700', '#fff', '#000', '#ff0000', '#ff6b6b', '#ff9f43', '#feca57',
     '#48dbfb', '#0abde3', '#10ac84', '#1dd1a1', '#5f27cd', '#341f97', '#e84393',
     '#fd79a8', '#6c5ce7', '#a29bfe', '#00cec9', '#81ecec', '#fab1a0', '#e17055',
     '#636e72', '#b2bec3', '#2d3436', '#dfe6e9', '#74b9ff', '#0984e3', '#55efc4',
@@ -58,6 +68,7 @@ const effects = [
     { value: 'slide', label: 'انزلاق', animation: 'slide' },
     { value: 'fade', label: 'تلاشي', animation: 'fade' },
     { value: 'rotate', label: 'دوران', animation: 'rotate' },
+    { value: 'scale', label: 'تكبير', animation: 'scale' },
     { value: 'glitter', label: 'بريق', animation: 'glitter' },
     { value: 'shining', label: 'لمعان', animation: 'shining' },
     { value: 'flashing', label: 'وميض قوي', animation: 'flashing' },
@@ -75,15 +86,12 @@ const frames = [
     { value: 'purple', label: 'إطار بنفسجي متوهج' }
 ];
 
-function switchTab(tab, evt) {
+function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    
     const targetTab = document.getElementById('tab-' + tab);
     if (targetTab) targetTab.style.display = 'flex';
-    
-    const targetBtn = evt ? evt.target : window.event?.target;
-    if (targetBtn) targetBtn.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
 }
 
 function isOwner() {
@@ -98,7 +106,7 @@ async function registerUser() {
     const confirm = document.getElementById('reg-confirm').value;
     
     if (!username || !email || !password) {
-        alert('يرجى ملء جميع الحقول المطلوبة');
+        alert('املأ كل الحقول');
         return;
     }
     if (password !== confirm) {
@@ -110,36 +118,27 @@ async function registerUser() {
         return;
     }
     
-    const role = (email === OWNER_EMAIL && username === OWNER_USERNAME) ? 'King' : 'Member';
-    
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            data: { username: username }
-        }
-    });
-
-    if (error) {
-        alert('خطأ في التسجيل: ' + error.message);
-        return;
-    }
-
-    if (data.user) {
-        await supabase.from('users').insert({
-            id: data.user.id,
+    try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const role = (email === OWNER_EMAIL && username === OWNER_USERNAME) ? 'King' : 'Guest';
+        
+        await db.collection('users').doc(userCredential.user.uid).set({
             username: username,
             email: email,
             role: role,
             bio: '',
-            cover_url: '',
-            avatar_url: '',
-            background_url: '',
-            text_style: textStyle
+            coverUrl: '',
+            avatarUrl: '',
+            backgroundUrl: '',
+            textStyle: textStyle,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        alert('تم التسجيل بنجاح! يمكن الدخول الآن.');
+        alert('تم التسجيل! أرسلنا لك رابط تأكيد على إيميلك');
+        await userCredential.user.sendEmailVerification();
         switchTab('login');
+    } catch (err) {
+        alert('خطأ: ' + err.message);
     }
 }
 
@@ -148,94 +147,82 @@ async function loginUser() {
     const password = document.getElementById('login-password').value;
     
     if (!usernameOrEmail || !password) {
-        alert('يرجى أدخل اسم المستخدم أو الإيميل وكلمة السر');
+        alert('املأ كل الحقول');
         return;
     }
     
-    let email = usernameOrEmail;
-    if (!usernameOrEmail.includes('@')) {
-        const { data: userRecord, error: userErr } = await supabase
-            .from('users')
-            .select('email')
-            .eq('username', usernameOrEmail)
-            .maybeSingle();
+    try {
+        let email = usernameOrEmail;
+        if (!usernameOrEmail.includes('@')) {
+            const snapshot = await db.collection('users')
+                .where('username', '==', usernameOrEmail)
+                .limit(1)
+                .get();
             
-        if (userErr || !userRecord) {
-            alert('اسم المستخدم غير موجود');
+            if (snapshot.empty) {
+                alert('المستخدم غير موجود');
+                return;
+            }
+            email = snapshot.docs[0].data().email;
+        }
+        
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        if (!userCredential.user.emailVerified) {
+            alert('يرجى تأكيد إيميلك أولاً');
             return;
         }
-        email = userRecord.email;
+        
+        await loadUserData(userCredential.user.uid);
+        enterChat();
+    } catch (err) {
+        alert('خطأ: ' + err.message);
     }
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
-
-    if (error) {
-        alert('خطأ في تسجيل الدخول: ' + error.message);
-        return;
-    }
-
-    await loadUserData(data.user.id);
-    enterChat();
 }
 
+// تسجيل دخول الزوار المجهول رسمياً بـ Firebase Auth
 async function guestLogin() {
     const username = document.getElementById('guest-username').value.trim();
     const age = document.getElementById('guest-age').value;
     const gender = document.getElementById('guest-gender').value;
     
     if (!username || !age) {
-        alert('يرجى إدخال الاسم والعمر');
+        alert('املأ كل الحقول');
         return;
     }
     if (age < 10 || age > 99) {
-        alert('يرجى إدخال عمر صحيح بين 10 و 99');
+        alert('عمر غير صحيح');
         return;
     }
     
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) {
-        alert('خطأ في دخول الزائر: ' + error.message);
-        return;
+    try {
+        const userCredential = await auth.signInAnonymously();
+        currentUser = userCredential.user.uid;
+        currentUserData = {
+            uid: currentUser,
+            username: username,
+            age: age,
+            gender: gender,
+            role: 'Guest',
+            isGuest: true,
+            email: null,
+            bio: '',
+            coverUrl: '',
+            avatarUrl: '',
+            backgroundUrl: '',
+            textStyle: textStyle
+        };
+        enterChat();
+    } catch (err) {
+        alert('خطأ في تسجيل الزائر: ' + err.message);
     }
-
-    currentUser = data.user.id;
-    currentUserData = {
-        uid: currentUser,
-        username: username,
-        age: age,
-        gender: gender,
-        role: 'Guest',
-        isGuest: true,
-        email: null,
-        bio: '',
-        coverUrl: '',
-        avatarUrl: '',
-        backgroundUrl: '',
-        textStyle: textStyle
-    };
-    enterChat();
 }
 
 async function loadUserData(uid) {
-    const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', uid)
-        .maybeSingle();
-
-    if (data && !error) {
+    const doc = await db.collection('users').doc(uid).get();
+    if (doc.exists) {
         currentUser = uid;
-        currentUserData = {
-            ...data,
-            uid: uid,
-            coverUrl: data.cover_url || '',
-            avatarUrl: data.avatar_url || '',
-            backgroundUrl: data.background_url || '',
-            textStyle: data.text_style || textStyle
-        };
+        currentUserData = doc.data();
+        currentUserData.uid = uid;
         
         if (currentUserData.textStyle) {
             textStyle = currentUserData.textStyle;
@@ -260,12 +247,12 @@ function enterChat() {
         privateRoomItem.style.display = 'block';
     }
     
-    loadInitialMessages();
     listenForMessages();
     
-    supabase.from('messages').insert({
+    db.collection('messages').add({
         username: 'النظام',
-        message: `🌟 ${currentUserData.username} انضم للروم`
+        message: `🌟 ${currentUserData.username} انضم للروم`,
+        created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
 }
 
@@ -273,77 +260,73 @@ async function sendMessage() {
     const text = messageInput.value.trim();
     if (!text || !currentUserData) return;
     
-    const { error } = await supabase.from('messages').insert({
-        username: currentUserData.username,
-        message: text,
-        uid: currentUser,
-        role: currentUserData.role || 'Guest',
-        text_style: currentUserData.textStyle || textStyle
-    });
-
-    if (error) {
-        alert('خطأ في إرسال الرسالة: ' + error.message);
-    } else {
+    try {
+        await db.collection('messages').add({
+            username: currentUserData.username,
+            message: text,
+            uid: currentUser,
+            role: currentUserData.role || 'Guest',
+            textStyle: currentUserData.textStyle || textStyle,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
         messageInput.value = '';
-    }
-}
-
-async function loadInitialMessages() {
-    messagesDiv.innerHTML = '';
-    const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(100);
-
-    if (data && !error) {
-        data.forEach(msg => addMessageToScreen(msg, msg.id));
+    } catch (err) {
+        alert('خطأ: ' + err.message);
     }
 }
 
 function listenForMessages() {
-    if (messageSubscription) supabase.removeChannel(messageSubscription);
-    
-    messageSubscription = supabase
-        .channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-            const msg = payload.new;
-            if (!document.querySelector(`[data-id="${msg.id}"]`)) {
-                addMessageToScreen(msg, msg.id);
-            }
-        })
-        .subscribe();
+    db.collection('messages')
+        .orderBy('created_at', 'asc')
+        .limitToLast(100)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    const msgData = change.doc.data();
+                    // تحسين البحث عن تكرار الرسالة بدلاً من اللوب على الكل
+                    if (!document.querySelector(`[data-id="${change.doc.id}"]`)) {
+                        addMessageToScreen(msgData, change.doc.id);
+                    }
+                }
+            });
+        });
 }
 
 function getEffectAnimation(effect) {
-    const validEffects = effects.map(e => e.animation);
+    const validEffects = [
+        'glow-gold', 'glow-white', 'glow-blue', 'glow-red', 'glow-green', 'glow-purple', 'glow-rainbow',
+        'blink', 'pulse', 'rainbow', 'shake', 'float', 'bounce', 'swing', 'wobble', 'zoom', 'flip',
+        'slide', 'fade', 'rotate', 'scale', 'glitter', 'shining', 'flashing', 'color-change'
+    ];
     return validEffects.includes(effect) ? effect : 'none';
 }
 
+// حماية آمنة من ثغرة XSS باستخدام DOM Manipulation
 function addMessageToScreen(msg, id) {
     const div = document.createElement('div');
     div.className = 'message';
     if (id) div.dataset.id = id;
     
-    const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }) : '';
+    const timeStr = msg.created_at ? new Date(msg.created_at.seconds * 1000).toLocaleTimeString('ar') : '';
     
     if (msg.username === 'النظام') {
-        div.classList.add('system-msg');
+        div.style.borderRight = '3px solid #4ade80';
+        div.style.background = 'rgba(74, 222, 128, 0.1)';
     }
     if (msg.role === 'King') {
-        div.classList.add('king-msg');
+        div.style.borderRight = '3px solid #ffd700';
+        div.style.background = 'rgba(255, 215, 0, 0.1)';
     }
     
     const nameDiv = document.createElement('div');
     nameDiv.className = 'username';
     nameDiv.textContent = `${msg.username} ${msg.role === 'King' ? '👑' : ''}`;
     
-    const styleObj = msg.text_style || msg.textStyle;
-    if (styleObj) {
-        const ts = styleObj;
-        let nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size || 22}px;color:${ts.color};`;
+    if (msg.textStyle) {
+        const ts = msg.textStyle;
+        let nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size}px;color:${ts.color};`;
         nameStyle += ts.bg && ts.bg !== 'transparent' ? `background:${ts.bg};` : 'background:transparent;';
-        nameStyle += 'padding: 2px 8px; border-radius: 6px; display: inline-block;';
+        nameStyle += 'padding: 2px 5px; border-radius: 4px;';
         
         if (ts.frame === 'gold') nameStyle += `border: 2px solid #d4af37; box-shadow: 0 0 10px #d4af37;`;
         if (ts.frame === 'rainbow') nameStyle += `border: 2px solid; border-image: linear-gradient(90deg, red, orange, yellow, green, blue, purple) 1; box-shadow: 0 0 10px #fff;`;
@@ -362,7 +345,7 @@ function addMessageToScreen(msg, id) {
     
     const textDiv = document.createElement('div');
     textDiv.className = 'text';
-    textDiv.textContent = msg.message;
+    textDiv.textContent = msg.message; // نستخدم textContent لمنع إدخال أكواد خبيثة
     
     const timeDiv = document.createElement('div');
     timeDiv.className = 'time';
@@ -378,27 +361,22 @@ function addMessageToScreen(msg, id) {
 
 function copyRoomLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
-        alert('تم نسخ رابط الروم بنجاح!');
+        alert('تم نسخ رابط الغرفة!');
     });
 }
 
 function toggleMics() {
-    const micsBar = document.getElementById('mics-bar');
-    if (!micsBar) return;
-    const mics = micsBar.querySelector('.mics');
-    if (mics) {
-        const isHidden = mics.style.display === 'none';
-        mics.style.display = isHidden ? 'flex' : 'none';
-    }
+    const mics = document.getElementById('mics-bar').querySelector('.mics');
+    mics.style.display = (mics.style.display === 'none') ? 'flex' : 'none';
 }
 
 function toggleMenu(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     openSidebar('left-sidebar');
 }
 
 function toggleRooms(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     openSidebar('right-sidebar');
 }
 
@@ -424,7 +402,7 @@ function showAlert(msg) {
 }
 
 function toggleProfile(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     closeAllSidebars();
     openProfile();
 }
@@ -433,7 +411,9 @@ function openProfile() {
     if (!currentUserData) return;
     
     document.getElementById('profile-name').textContent = currentUserData.username;
-    document.getElementById('profile-bio').textContent = currentUserData.bio || 'اضغط لكتابة تعريف رمزي...';
+    document.getElementById('profile-name').contentEditable = false;
+    document.getElementById('profile-bio').textContent = currentUserData.bio || '';
+    document.getElementById('profile-bio').contentEditable = false;
     
     applyStyleToName();
     
@@ -469,8 +449,8 @@ function closeProfile() {
 
 async function saveProfile() {
     const bio = document.getElementById('profile-bio').textContent.trim();
-    if (bio.length > 30) {
-        alert('التعريف الرمزي يجب ألا يتجاوز 30 حرفاً');
+    if (bio.length > 20) {
+        alert('التعريف الرمزي 20 حرف كحد أقصى');
         return;
     }
     
@@ -478,14 +458,14 @@ async function saveProfile() {
     currentUserData.textStyle = textStyle;
     
     if (currentUser && !currentUserData.isGuest) {
-        await supabase.from('users').update({
+        await db.collection('users').doc(currentUser).update({
             bio: bio,
-            text_style: textStyle
-        }).eq('id', currentUser);
+            textStyle: textStyle
+        });
     }
     
     closeProfile();
-    alert('تم حفظ البيانات بنجاح!');
+    alert('تم الحفظ!');
 }
 
 function editName() {
@@ -501,14 +481,14 @@ function closeNameEditDialog() {
     document.getElementById('name-edit-dialog').style.display = 'none';
 }
 
-async function applyNameEdit() {
+function applyNameEdit() {
     const newName = document.getElementById('name-edit-input').value.trim();
     if (newName && newName !== currentUserData.username) {
         currentUserData.username = newName;
         document.getElementById('profile-name').textContent = newName;
         
         if (currentUser && !currentUserData.isGuest) {
-            await supabase.from('users').update({ username: newName }).eq('id', currentUser);
+            db.collection('users').doc(currentUser).update({ username: newName });
         }
     }
     
@@ -529,8 +509,8 @@ function editBio() {
         bioEl.contentEditable = false;
         const newBio = bioEl.textContent.trim();
         
-        if (newBio.length > 30) {
-            alert('التعريف الرمزي يجب ألا يتجاوز 30 حرفاً');
+        if (newBio.length > 20) {
+            alert('التعريف الرمزي 20 حرف كحد أقصى');
             bioEl.textContent = currentUserData.bio || '';
             return;
         }
@@ -538,7 +518,7 @@ function editBio() {
         if (newBio !== currentUserData.bio) {
             currentUserData.bio = newBio;
             if (currentUser && !currentUserData.isGuest) {
-                await supabase.from('users').update({ bio: newBio }).eq('id', currentUser);
+                await db.collection('users').doc(currentUser).update({ bio: newBio });
             }
         }
     }, { once: true });
@@ -546,7 +526,7 @@ function editBio() {
 
 function toggleOptionsMenu() {
     const menu = document.getElementById('options-menu');
-    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+    menu.style.display = (menu.style.display === 'none') ? 'flex' : 'none';
 }
 
 function closeOptionsMenu() {
@@ -587,7 +567,7 @@ function openBgDialog() {
     const transparentDiv = document.createElement('div');
     transparentDiv.className = 'color-item';
     transparentDiv.style.background = 'transparent';
-    transparentDiv.style.border = '2px dashed #aaa';
+    transparentDiv.style.border = '2px dashed #fff';
     transparentDiv.onclick = function() {
         textStyle.bg = 'transparent';
         grid.querySelectorAll('.color-item').forEach(el => el.classList.remove('selected'));
@@ -636,10 +616,10 @@ function openEffectDialog() {
         
         const preview = document.createElement('div');
         preview.className = 'effect-preview';
-        preview.textContent = currentUserData?.username || 'قمر الشام';
+        preview.textContent = currentUserData.username;
         
         if (effect.animation !== 'none') {
-            preview.style.animation = `${effect.animation} ${3 / (textStyle.intensity || 5)}s infinite`;
+            preview.style.animation = `${effect.animation} ${3 / textStyle.intensity}s infinite`;
         }
         
         div.appendChild(preview);
@@ -698,10 +678,10 @@ function applyFont() {
 function applyEffect() { closeEffectDialog(); applyStyleToName(); saveTextStyle(); }
 function applyFrame() { closeFrameDialog(); applyStyleToName(); saveTextStyle(); }
 
-async function saveTextStyle() {
-    if (currentUserData) currentUserData.textStyle = textStyle;
-    if (currentUser && !currentUserData?.isGuest) {
-        await supabase.from('users').update({ text_style: textStyle }).eq('id', currentUser);
+function saveTextStyle() {
+    currentUserData.textStyle = textStyle;
+    if (currentUser && !currentUserData.isGuest) {
+        db.collection('users').doc(currentUser).update({ textStyle: textStyle });
     }
 }
 
@@ -710,13 +690,14 @@ function applyStyleToName() {
     if (!nameEl) return;
     
     let css = `
-        font-family: '${textStyle.font}', sans-serif;
+        font-family: ${textStyle.font}, sans-serif;
         font-size: ${textStyle.sizeW}px;
         line-height: ${textStyle.sizeH}px;
         color: ${textStyle.color};
         background: transparent;
         border: none;
         box-shadow: none;
+        text-shadow: none;
         padding: 0;
     `;
     
@@ -725,40 +706,30 @@ function applyStyleToName() {
     
     const anim = getEffectAnimation(textStyle.effect);
     if (anim !== 'none') {
-        nameEl.style.animation = `${anim} ${3 / (textStyle.intensity || 5)}s infinite`;
+        nameEl.style.animation = `${anim} ${3 / textStyle.intensity}s infinite`;
     }
 }
 
-const widthRange = document.getElementById('name-width-range');
-if (widthRange) {
-    widthRange.addEventListener('input', function() {
-        textStyle.sizeW = parseInt(this.value);
-        document.getElementById('name-width-value').textContent = this.value;
-        applyStyleToName();
-    });
-}
+document.getElementById('name-width-range').addEventListener('input', function() {
+    textStyle.sizeW = parseInt(this.value);
+    document.getElementById('name-width-value').textContent = this.value;
+    applyStyleToName();
+});
 
-const heightRange = document.getElementById('name-height-range');
-if (heightRange) {
-    heightRange.addEventListener('input', function() {
-        textStyle.sizeH = parseInt(this.value);
-        document.getElementById('name-height-value').textContent = this.value;
-        applyStyleToName();
-    });
-}
+document.getElementById('name-height-range').addEventListener('input', function() {
+    textStyle.sizeH = parseInt(this.value);
+    document.getElementById('name-height-value').textContent = this.value;
+    applyStyleToName();
+});
 
-const intensityRange = document.getElementById('effect-intensity');
-if (intensityRange) {
-    intensityRange.addEventListener('input', function() {
-        textStyle.intensity = parseInt(this.value);
-        document.getElementById('intensity-value').textContent = this.value;
-        applyStyleToName();
-    });
-}
+document.getElementById('effect-intensity').addEventListener('input', function() {
+    textStyle.intensity = parseInt(this.value);
+    document.getElementById('intensity-value').textContent = this.value;
+    applyStyleToName();
+});
 
-async function logout() {
-    if (messageSubscription) supabase.removeChannel(messageSubscription);
-    await supabase.auth.signOut();
+function logout() {
+    auth.signOut();
     currentUser = null;
     currentUserData = null;
     profileOverlay.classList.remove('show');
@@ -775,12 +746,16 @@ function triggerUpload(type) {
     fileInput.click();
 }
 
+document.getElementById('cover-upload-btn').addEventListener('click', () => triggerUpload('cover'));
+document.getElementById('avatar-upload-btn').addEventListener('click', () => triggerUpload('avatar'));
+document.getElementById('bg-upload-btn').addEventListener('click', () => triggerUpload('background'));
+
 fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    if (!currentUser || currentUserData?.isGuest) {
-        alert('الزوار لا يمكنهم تغيير الصور');
+    if (!currentUser || currentUserData.isGuest) {
+        alert('الزوار لا يمكنهم رفع صور');
         return;
     }
     
@@ -794,7 +769,7 @@ fileInput.addEventListener('change', async (e) => {
         
         let width = img.width;
         let height = img.height;
-        const maxSize = 800;
+        const maxSize = 800; // تقليل أبعاد الصورة لتقليل حجم Base64
         
         if (width > maxSize || height > maxSize) {
             if (width > height) {
@@ -810,29 +785,29 @@ fileInput.addEventListener('change', async (e) => {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة لـ 70%
         
         const updateData = {};
         if (uploadType === 'cover') {
             currentUserData.coverUrl = compressedBase64;
             document.getElementById('cover-img').src = compressedBase64;
             document.getElementById('cover-img').style.display = 'block';
-            updateData.cover_url = compressedBase64;
+            updateData.coverUrl = compressedBase64;
         } else if (uploadType === 'avatar') {
             currentUserData.avatarUrl = compressedBase64;
             document.getElementById('avatar-img').src = compressedBase64;
             document.getElementById('avatar-img').style.display = 'block';
             document.getElementById('avatar-letter').style.display = 'none';
-            updateData.avatar_url = compressedBase64;
+            updateData.avatarUrl = compressedBase64;
         } else {
             currentUserData.backgroundUrl = compressedBase64;
             document.getElementById('bg-img').src = compressedBase64;
             document.getElementById('bg-img').style.display = 'block';
-            updateData.background_url = compressedBase64;
+            updateData.backgroundUrl = compressedBase64;
         }
         
-        await supabase.from('users').update(updateData).eq('id', currentUser);
-        alert('تم رفع الصورة بنجاح!');
+        await db.collection('users').doc(currentUser).update(updateData);
+        alert('تم رفع الصورة!');
     };
     
     reader.readAsDataURL(file);
@@ -842,8 +817,8 @@ fileInput.addEventListener('change', async (e) => {
 async function removeCover() {
     currentUserData.coverUrl = '';
     document.getElementById('cover-img').style.display = 'none';
-    if (currentUser && !currentUserData?.isGuest) {
-        await supabase.from('users').update({ cover_url: '' }).eq('id', currentUser);
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({ coverUrl: '' });
     }
 }
 
@@ -851,33 +826,33 @@ async function removeAvatar() {
     currentUserData.avatarUrl = '';
     document.getElementById('avatar-img').style.display = 'none';
     document.getElementById('avatar-letter').style.display = 'block';
-    if (currentUser && !currentUserData?.isGuest) {
-        await supabase.from('users').update({ avatar_url: '' }).eq('id', currentUser);
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({ avatarUrl: '' });
     }
 }
 
 async function removeBackground() {
     currentUserData.backgroundUrl = '';
     document.getElementById('bg-img').style.display = 'none';
-    if (currentUser && !currentUserData?.isGuest) {
-        await supabase.from('users').update({ background_url: '' }).eq('id', currentUser);
+    if (currentUser && !currentUserData.isGuest) {
+        await db.collection('users').doc(currentUser).update({ backgroundUrl: '' });
     }
 }
 
 function toggleNotifications(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     closeAllSidebars();
     alert('الإشعارات - قريباً');
 }
 
 function togglePrivate(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     closeAllSidebars();
     alert('الرسائل الخاصة - قريباً');
 }
 
 function toggleMemory(event) {
-    if (event) event.stopPropagation();
+    event.stopPropagation();
     closeAllSidebars();
     alert('الذاكرة - قريباً');
 }
