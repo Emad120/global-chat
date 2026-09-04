@@ -835,6 +835,24 @@ function uploadBackground() {
     fileInput.click();
 }
 
+document.getElementById('cover-upload-btn').addEventListener('click', function() {
+    uploadType = 'cover';
+    fileInput.value = '';
+    fileInput.click();
+});
+
+document.getElementById('avatar-upload-btn').addEventListener('click', function() {
+    uploadType = 'avatar';
+    fileInput.value = '';
+    fileInput.click();
+});
+
+document.getElementById('bg-upload-btn').addEventListener('click', function() {
+    uploadType = 'background';
+    fileInput.value = '';
+    fileInput.click();
+});
+
 fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
