@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://eqlfuyvndvpmmzfthacr.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_0RSRXxjdE-w81kXwYUL7kQ_rPSIIl75';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxbGZ1eXZuZHZwbW1temZ0aGFjciIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzAwMDAwMDAwLCJleHAiOjIwMTU3NjAwMDB9.placeholder';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
@@ -729,7 +729,6 @@ function applyStyleToName() {
     }
 }
 
-// السلايدرات البرمجية
 const widthRange = document.getElementById('name-width-range');
 if (widthRange) {
     widthRange.addEventListener('input', function() {
