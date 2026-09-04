@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌙 قمر الشام - منصة الشات الملكية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Lateef:wght@400;700&family=Scheherazade+New:wght@400;700&family=Markazi+Text:wght@400;700&family=Harmattan:wght@400;700&family=Jomhuria&family=Lalezar&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -148,6 +148,7 @@
                 <div class="name-row">
                     <h2 id="profile-name"></h2>
                     <button class="btn-edit" onclick="editName()">✏️</button>
+                    <button class="btn-style" onclick="openTextEditor()">🎨</button>
                 </div>
                 <div class="bio-row">
                     <p class="profile-bio" id="profile-bio" contenteditable="true">اضغط لكتابة تعريف رمزي...</p>
@@ -168,6 +169,103 @@
             <div class="profile-actions">
                 <button class="btn-secondary" onclick="saveProfile()">💾 حفظ</button>
             </div>
+        </div>
+    </div>
+
+    <div class="text-editor" id="text-editor" style="display:none">
+        <div class="editor-header">
+            <h4>🎨 تعديل الاسم</h4>
+            <button onclick="closeTextEditor()">✕</button>
+        </div>
+        
+        <div class="editor-content">
+            <div class="editor-section">
+                <label>الخط</label>
+                <select id="font-select">
+                    <option value="Cairo">Cairo</option>
+                    <option value="Amiri">Amiri</option>
+                    <option value="Reem Kufi">Reem Kufi</option>
+                    <option value="Aref Ruqaa">Aref Ruqaa</option>
+                    <option value="Lateef">Lateef</option>
+                    <option value="Scheherazade New">Scheherazade New</option>
+                    <option value="Markazi Text">Markazi Text</option>
+                    <option value="Harmattan">Harmattan</option>
+                    <option value="Jomhuria">Jomhuria</option>
+                    <option value="Lalezar">Lalezar</option>
+                </select>
+            </div>
+            
+            <div class="editor-section">
+                <label>الحجم</label>
+                <input type="range" id="font-size" min="12" max="48" value="22">
+                <span id="font-size-value">22</span>
+            </div>
+            
+            <div class="editor-section">
+                <label>لون الاسم</label>
+                <input type="color" id="font-color" value="#d4af37">
+            </div>
+            
+            <div class="editor-section">
+                <label>خلفية الاسم</label>
+                <input type="color" id="font-bg" value="#000000">
+            </div>
+            
+            <div class="editor-section">
+                <label>الإطار</label>
+                <select id="border-style">
+                    <option value="none">بدون</option>
+                    <option value="solid">خط متصل</option>
+                    <option value="dashed">خط متقطع</option>
+                    <option value="dotted">نقاط</option>
+                    <option value="double">مزدوج</option>
+                </select>
+            </div>
+            
+            <div class="editor-section">
+                <label>الأسلوب</label>
+                <div class="style-buttons">
+                    <button onclick="toggleBold()" id="bold-btn">B</button>
+                    <button onclick="toggleItalic()" id="italic-btn">I</button>
+                    <button onclick="toggleUnderline()" id="underline-btn">U</button>
+                    <button onclick="toggleShadow()" id="shadow-btn">S</button>
+                </div>
+            </div>
+            
+            <div class="editor-section">
+                <label>التأثير</label>
+                <select id="effect-select">
+                    <option value="none">بدون</option>
+                    <option value="glow">توهج</option>
+                    <option value="blink">وميض</option>
+                    <option value="pulse">نبض</option>
+                    <option value="gradient">تدرج</option>
+                    <option value="border-glow">حدود مضيئة</option>
+                    <option value="shake">اهتزاز</option>
+                    <option value="float">طفو</option>
+                    <option value="rotate">دوران</option>
+                    <option value="scale">تكبير</option>
+                    <option value="fade">تلاشي</option>
+                    <option value="slide">انزلاق</option>
+                    <option value="bounce">قفز</option>
+                    <option value="flip">انعكاس</option>
+                    <option value="swing">تأرجح</option>
+                    <option value="wobble">تمايل</option>
+                    <option value="zoom">زوم</option>
+                    <option value="flashing">وميض قوي</option>
+                    <option value="shining">لمعان</option>
+                    <option value="glitter">بريق</option>
+                    <option value="rainbow">قوس قزح</option>
+                </select>
+            </div>
+            
+            <div class="editor-section">
+                <label>شدة التأثير</label>
+                <input type="range" id="effect-intensity" min="1" max="10" value="5">
+                <span id="intensity-value">5</span>
+            </div>
+            
+            <button class="btn-apply" onclick="applyTextStyle()">تطبيق</button>
         </div>
     </div>
 
