@@ -493,6 +493,9 @@ body {
     cursor: pointer;
     font-size: 18px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-cover-remove {
@@ -505,6 +508,63 @@ body {
     cursor: pointer;
     font-size: 16px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-toolbar {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    padding: 10px;
+    background: transparent;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.toolbar-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.3);
+    color: #d4af37;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    pointer-events: auto;
+}
+
+.options-menu {
+    position: absolute;
+    top: 310px;
+    right: 10px;
+    z-index: 60;
+    background: #1a1a1a;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    padding: 5px;
+    display: none;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 180px;
+}
+
+.option-item {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    text-align: right;
+    pointer-events: auto;
+}
+
+.option-item:hover {
+    background: rgba(212, 175, 55, 0.2);
 }
 
 .profile-avatar-container {
@@ -565,6 +625,9 @@ body {
     cursor: pointer;
     font-size: 14px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .btn-remove {
@@ -577,6 +640,9 @@ body {
     cursor: pointer;
     font-size: 12px;
     pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .name-row {
@@ -629,6 +695,10 @@ body {
     color: #fff;
     cursor: pointer;
     font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
 }
 
 .profile-info {
@@ -680,15 +750,6 @@ body {
     object-fit: cover;
 }
 
-.bg-actions {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 100;
-    display: flex;
-    gap: 10px;
-}
-
 .profile-actions {
     display: flex;
     gap: 10px;
@@ -709,4 +770,176 @@ body {
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
     font-size: 11px;
+}
+
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    z-index: 30;
+    padding: 15px;
+}
+
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dialog-header h4 {
+    color: #d4af37;
+    font-size: 14px;
+}
+
+.dialog-header button {
+    width: 25px;
+    height: 25px;
+    border: none;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.color-item {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.color-item.selected {
+    border-color: #fff;
+}
+
+.dialog select,
+.dialog input[type="range"],
+.dialog input[type="text"] {
+    padding: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    width: 100%;
+}
+
+.btn-apply {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #d4af37;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-danger {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #dc2626;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.frame-list,
+.effect-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.frame-item,
+.effect-item {
+    padding: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    pointer-events: auto;
+}
+
+.frame-item.selected,
+.effect-item.selected {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.effect-preview {
+    font-size: 18px;
+    color: #d4af37;
+    margin-bottom: 5px;
+    pointer-events: none;
+}
+
+.bg-dialog-preview {
+    width: 100%;
+    height: 150px;
+    background: #111;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.bg-dialog-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bg-dialog-preview span {
+    color: #666;
+    font-size: 13px;
+}
+
+.bg-dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
