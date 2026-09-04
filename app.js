@@ -903,3 +903,79 @@ function toggleMemory(event) {
 messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
+
+// ============ نظام المايكات ============
+const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
+let agoraClient = null;
+let localAudioTrack = null;
+let joinedMicNumber = null;
+
+function generateToken() {
+    return '007eJxTYHBJPMmddT/glcAK5/Lg39NiGI5NE/uhemq3Bcu7r2v37/JQYEg2MDM0TjU0Mk60TDMxSk1LtEy1sLQ0MzYBCpkYm6Z6K8zOaghkZLjwt5+BEQpBfE6GktTiEt2i/PxcBgYAC5kh7Q==';
+}
+
+async function joinMic(micNumber) {
+    if (!currentUserData) {
+        alert('سجل دخول أولاً!');
+        return;
+    }
+    
+    if (joinedMicNumber === micNumber) {
+        await leaveMic();
+        return;
+    }
+    
+    if (joinedMicNumber) {
+        await leaveMic();
+    }
+    
+    try {
+        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        
+        const token = generateToken();
+        await agoraClient.join(AGORA_APP_ID, 'qamar-chat', token, null);
+        
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        await agoraClient.publish([localAudioTrack]);
+        
+        joinedMicNumber = micNumber;
+        
+        const micEl = document.getElementById('mic' + micNumber);
+        micEl.classList.add('taken');
+        micEl.textContent = currentUserData.username.charAt(0);
+        
+        alert('✅ انضممت للمايك ' + micNumber);
+        
+        agoraClient.on('user-published', async (user, mediaType) => {
+            if (mediaType === 'audio') {
+                await agoraClient.subscribe(user, mediaType);
+                user.audioTrack.play();
+            }
+        });
+        
+    } catch (err) {
+        alert('❌ خطأ: ' + err.message);
+    }
+}
+
+async function leaveMic() {
+    if (!joinedMicNumber) return;
+    
+    try {
+        if (localAudioTrack) {
+            localAudioTrack.close();
+            localAudioTrack = null;
+        }
+        if (agoraClient) {
+            await agoraClient.leave();
+            agoraClient = null;
+        }
+        
+        const micEl = document.getElementById('mic' + joinedMicNumber);
+        micEl.classList.remove('taken');
+        micEl.textContent = '🎙️';
+        
+        alert('غادرت المايك');
+        joinedMicNumber = null;
+    } catch (err) {
+        alert('❌ خط
