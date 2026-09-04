@@ -124,12 +124,15 @@
 
     <div class="profile-overlay" id="profile-overlay">
         <div class="profile-box">
-            <button class="btn-close" onclick="closeProfile()" style="position:absolute; top:10px; left:10px; z-index:999; pointer-events:auto; cursor:pointer;">✕</button>
+            <button class="btn-close" onclick="closeProfile()">✕</button>
             
             <div class="profile-cover" id="profile-cover">
-                <button class="btn-camera" onclick="uploadCover()" style="position:absolute; top:10px; left:50px; z-index:999; pointer-events:auto; cursor:pointer;">📷</button>
-                <button class="btn-remove" onclick="removeCover()" style="position:absolute; top:10px; right:10px; z-index:999; pointer-events:auto; cursor:pointer;">✕</button>
-                <img id="cover-img" style="display:none; width:100%; height:100%; object-fit:cover; pointer-events:none;" alt="الغلاف">
+                <img id="cover-img" style="display:none" alt="الغلاف">
+            </div>
+            
+            <div class="cover-buttons">
+                <button class="btn-cover-camera" onclick="uploadCover()">📷</button>
+                <button class="btn-cover-remove" onclick="removeCover()">✕</button>
             </div>
             
             <div class="profile-avatar-container">
@@ -137,8 +140,8 @@
                     <img id="avatar-img" style="display:none" alt="الصورة الشخصية">
                     <span id="avatar-letter"></span>
                 </div>
-                <button class="btn-camera" onclick="uploadAvatar()" style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); z-index:999; pointer-events:auto; cursor:pointer;">📷</button>
-                <button class="btn-remove" onclick="removeAvatar()" style="position:absolute; bottom:5px; left:calc(50% - 45px); z-index:999; pointer-events:auto; cursor:pointer;">✕</button>
+                <button class="btn-camera" onclick="uploadAvatar()">📷</button>
+                <button class="btn-remove" onclick="removeAvatar()">✕</button>
             </div>
             
             <div class="profile-info">
@@ -155,11 +158,11 @@
             <div class="divider"></div>
             
             <div class="profile-background">
-                <div class="bg-actions" style="position:absolute; top:10px; left:10px; z-index:999; display:flex; gap:10px; pointer-events:auto;">
-                    <button class="btn-camera" onclick="uploadBackground()" style="pointer-events:auto; cursor:pointer;">📷</button>
-                    <button class="btn-remove" onclick="removeBackground()" style="pointer-events:auto; cursor:pointer;">✕</button>
+                <div class="bg-actions">
+                    <button class="btn-camera" onclick="uploadBackground()">📷</button>
+                    <button class="btn-remove" onclick="removeBackground()">✕</button>
                 </div>
-                <img id="bg-img" style="display:none; width:100%; height:100%; object-fit:cover; pointer-events:none;" alt="الخلفية">
+                <img id="bg-img" style="display:none" alt="الخلفية">
             </div>
             
             <div class="profile-actions">
