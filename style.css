@@ -491,7 +491,7 @@ body {
 .profile-avatar-container {
     display: flex;
     justify-content: center;
-    margin-top: -185px;
+    margin-top: -250px;
     position: relative;
     z-index: 3;
 }
