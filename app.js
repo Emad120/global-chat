@@ -31,10 +31,12 @@ const fileInput = document.getElementById('file-input');
 
 let textStyle = {
     font: 'Cairo',
-    size: 22,
+    sizeW: 22,
+    sizeH: 22,
     color: '#d4af37',
     bg: 'transparent',
     effect: 'none',
+    frame: 'none',
     intensity: 5
 };
 
@@ -56,7 +58,6 @@ const effects = [
     { value: 'rainbow', label: 'قوس قزح' },
     { value: 'shake', label: 'اهتزاز' },
     { value: 'float', label: 'طفو' },
-    { value: 'border-glow', label: 'إطار متوهج' },
     { value: 'bounce', label: 'قفز' },
     { value: 'swing', label: 'تأرجح' },
     { value: 'wobble', label: 'تمايل' },
@@ -69,6 +70,17 @@ const effects = [
     { value: 'glitter', label: 'بريق' },
     { value: 'shining', label: 'لمعان' },
     { value: 'flashing', label: 'وميض قوي' }
+];
+
+const frames = [
+    { value: 'none', label: 'بدون إطار' },
+    { value: 'gold', label: 'إطار ذهبي متوهج' },
+    { value: 'rainbow', label: 'إطار قوس قزح' },
+    { value: 'white', label: 'إطار أبيض متوهج' },
+    { value: 'blue', label: 'إطار أزرق متوهج' },
+    { value: 'red', label: 'إطار أحمر متوهج' },
+    { value: 'green', label: 'إطار أخضر متوهج' },
+    { value: 'purple', label: 'إطار بنفسجي متوهج' }
 ];
 
 function switchTab(tab) {
@@ -217,6 +229,9 @@ async function loadUserData(uid) {
         
         if (currentUserData.textStyle) {
             textStyle = currentUserData.textStyle;
+            if (!textStyle.sizeW) textStyle.sizeW = textStyle.size;
+            if (!textStyle.sizeH) textStyle.sizeH = textStyle.size;
+            if (!textStyle.frame) textStyle.frame = 'none';
         }
     }
 }
@@ -308,9 +323,17 @@ function addMessageToScreen(msg, id) {
     let nameStyle = '';
     if (msg.textStyle) {
         const ts = msg.textStyle;
-        nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};`;
+        nameStyle = `font-family:${ts.font};font-size:${ts.sizeW || ts.size}px;color:${ts.color};`;
         nameStyle += ts.bg && ts.bg !== 'transparent' ? `background:${ts.bg};` : 'background:transparent;';
         nameStyle += 'padding: 2px 5px; border-radius: 4px;';
+        
+        if (ts.frame === 'gold') nameStyle += `border: 2px solid #d4af37; box-shadow: 0 0 10px #d4af37;`;
+        if (ts.frame === 'rainbow') nameStyle += `border: 2px solid; border-image: linear-gradient(90deg, red, orange, yellow, green, blue, purple) 1; box-shadow: 0 0 10px #fff;`;
+        if (ts.frame === 'white') nameStyle += `border: 2px solid #fff; box-shadow: 0 0 10px #fff;`;
+        if (ts.frame === 'blue') nameStyle += `border: 2px solid #0abde3; box-shadow: 0 0 10px #0abde3;`;
+        if (ts.frame === 'red') nameStyle += `border: 2px solid #ff0000; box-shadow: 0 0 10px #ff0000;`;
+        if (ts.frame === 'green') nameStyle += `border: 2px solid #00ff00; box-shadow: 0 0 10px #00ff00;`;
+        if (ts.frame === 'purple') nameStyle += `border: 2px solid #9b59b6; box-shadow: 0 0 10px #9b59b6;`;
         
         switch(ts.effect) {
             case 'glow':
@@ -366,9 +389,6 @@ function addMessageToScreen(msg, id) {
                 break;
             case 'flashing':
                 nameStyle += `animation: flashing ${2 / ts.intensity}s infinite;`;
-                break;
-            case 'border-glow':
-                nameStyle += `border: 2px solid ${ts.color}; box-shadow: 0 0 ${ts.intensity * 2}px ${ts.color};`;
                 break;
         }
     }
@@ -508,26 +528,38 @@ async function saveProfile() {
 }
 
 function editName() {
-    const nameEl = document.getElementById('profile-name');
-    nameEl.contentEditable = true;
-    nameEl.focus();
+    document.getElementById('name-edit-input').value = currentUserData.username;
+    document.getElementById('name-width-range').value = textStyle.sizeW;
+    document.getElementById('name-width-value').textContent = textStyle.sizeW;
+    document.getElementById('name-height-range').value = textStyle.sizeH;
+    document.getElementById('name-height-value').textContent = textStyle.sizeH;
+    document.getElementById('name-edit-dialog').style.display = 'block';
+}
+
+function closeNameEditDialog() {
+    document.getElementById('name-edit-dialog').style.display = 'none';
+}
+
+function applyNameEdit() {
+    const newName = document.getElementById('name-edit-input').value.trim();
     
-    nameEl.addEventListener('blur', async function() {
-        nameEl.contentEditable = false;
-        const newName = nameEl.textContent.trim();
+    if (newName && newName !== currentUserData.username) {
+        currentUserData.username = newName;
+        document.getElementById('profile-name').textContent = newName;
         
-        if (newName && newName !== currentUserData.username) {
-            currentUserData.username = newName;
-            
-            if (currentUser && !currentUserData.isGuest) {
-                await db.collection('users').doc(currentUser).update({
-                    username: newName
-                });
-            }
+        if (currentUser && !currentUserData.isGuest) {
+            db.collection('users').doc(currentUser).update({
+                username: newName
+            });
         }
-        
-        applyStyleToName();
-    }, { once: true });
+    }
+    
+    textStyle.sizeW = parseInt(document.getElementById('name-width-range').value);
+    textStyle.sizeH = parseInt(document.getElementById('name-height-range').value);
+    
+    closeNameEditDialog();
+    applyStyleToName();
+    saveTextStyle();
 }
 
 function editBio() {
@@ -634,17 +666,6 @@ function closeBgDialog() {
     document.getElementById('bg-dialog').style.display = 'none';
 }
 
-function openSizeDialog() {
-    closeOptionsMenu();
-    document.getElementById('size-dialog').style.display = 'block';
-    document.getElementById('size-range').value = textStyle.size;
-    document.getElementById('size-value').textContent = textStyle.size;
-}
-
-function closeSizeDialog() {
-    document.getElementById('size-dialog').style.display = 'none';
-}
-
 function openFontDialog() {
     closeOptionsMenu();
     document.getElementById('font-dialog').style.display = 'block';
@@ -677,6 +698,31 @@ function closeEffectDialog() {
     document.getElementById('effect-dialog').style.display = 'none';
 }
 
+function openFrameDialog() {
+    closeOptionsMenu();
+    const frameList = document.getElementById('frame-list');
+    frameList.innerHTML = '';
+    
+    frames.forEach(frame => {
+        const div = document.createElement('div');
+        div.className = 'frame-item';
+        div.textContent = frame.label;
+        div.onclick = function() {
+            textStyle.frame = frame.value;
+            frameList.querySelectorAll('.frame-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            applyStyleToName();
+        };
+        frameList.appendChild(div);
+    });
+    
+    document.getElementById('frame-dialog').style.display = 'block';
+}
+
+function closeFrameDialog() {
+    document.getElementById('frame-dialog').style.display = 'none';
+}
+
 function closeAllDialogs() {
     document.querySelectorAll('.color-dialog, .dialog').forEach(el => el.style.display = 'none');
 }
@@ -688,13 +734,6 @@ function applyColor() {
 
 function applyBgColor() {
     closeBgDialog();
-    saveTextStyle();
-}
-
-function applySize() {
-    textStyle.size = parseInt(document.getElementById('size-range').value);
-    closeSizeDialog();
-    applyStyleToName();
     saveTextStyle();
 }
 
@@ -710,6 +749,11 @@ function applyEffect() {
     textStyle.intensity = parseInt(document.getElementById('effect-intensity').value);
     closeEffectDialog();
     applyStyleToName();
+    saveTextStyle();
+}
+
+function applyFrame() {
+    closeFrameDialog();
     saveTextStyle();
 }
 
@@ -729,7 +773,8 @@ function applyStyleToName() {
     
     let css = '';
     css += `font-family: ${textStyle.font}, sans-serif;`;
-    css += `font-size: ${textStyle.size}px;`;
+    css += `font-size: ${textStyle.sizeW}px;`;
+    css += `line-height: ${textStyle.sizeH}px;`;
     css += `color: ${textStyle.color};`;
     css += `background: transparent;`;
     css += `border: none;`;
@@ -798,9 +843,15 @@ function applyStyleToName() {
     }
 }
 
-document.getElementById('size-range').addEventListener('input', function() {
-    textStyle.size = parseInt(this.value);
-    document.getElementById('size-value').textContent = this.value;
+document.getElementById('name-width-range').addEventListener('input', function() {
+    textStyle.sizeW = parseInt(this.value);
+    document.getElementById('name-width-value').textContent = this.value;
+    applyStyleToName();
+});
+
+document.getElementById('name-height-range').addEventListener('input', function() {
+    textStyle.sizeH = parseInt(this.value);
+    document.getElementById('name-height-value').textContent = this.value;
     applyStyleToName();
 });
 
