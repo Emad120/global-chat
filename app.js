@@ -981,4 +981,66 @@ async function joinMic(micNumber) {
     
     // تأكد إن المايك فاضي
     const micDoc = await db.collection('mics').doc('mic' + micNumber).get();
-    if (micDoc.exists && micDoc.data().userId
+    if (micDoc.exists && micDoc.data().userId !== currentUser) {
+        alert('المايك مأخوذ!');
+        return;
+    }
+    
+    if (joinedMicNumber === micNumber) {
+        await leaveMic();
+        return;
+    }
+    
+    if (joinedMicNumber) {
+        await leaveMic();
+    }
+    
+    try {
+        if (!peer) initPeer();
+        
+        myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        joinedMicNumber = micNumber;
+        
+        // حفظ حالة المايك
+        await db.collection('mics').doc('mic' + micNumber).set({
+            micNumber: micNumber,
+            userId: currentUser,
+            username: currentUserData.username,
+            peerId: myPeerId || 'pending',
+            joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        alert('✅ انضممت للمايك ' + micNumber);
+        
+    } catch (err) {
+        alert('❌ خطأ: ' + err.message);
+    }
+}
+
+async function leaveMic() {
+    if (!joinedMicNumber) return;
+    
+    try {
+        if (myStream) {
+            myStream.getTracks().forEach(track => track.stop());
+            myStream = null;
+        }
+        
+        Object.values(activeCalls).forEach(call => call.close());
+        activeCalls = {};
+        
+        // حذف حالة المايك
+        await db.collection('mics').doc('mic' + joinedMicNumber).delete();
+        
+        alert('غادرت المايك');
+        joinedMicNumber = null;
+    } catch (err) {
+        alert('❌ خطأ: ' + err.message);
+    }
+}
+
+document.getElementById('mic1').addEventListener('click', () => joinMic(1));
+document.getElementById('mic2').addEventListener('click', () => joinMic(2));
+document.getElementById('mic3').addEventListener('click', () => joinMic(3));
+document.getElementById('mic4').addEventListener('click', () => joinMic(4));
