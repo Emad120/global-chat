@@ -816,17 +816,23 @@ let uploadType = '';
 
 function uploadCover() {
     uploadType = 'cover';
-    fileInput.click();
+    const input = document.getElementById('file-input');
+    input.accept = 'image/*';
+    input.click();
 }
 
 function uploadAvatar() {
     uploadType = 'avatar';
-    fileInput.click();
+    const input = document.getElementById('file-input');
+    input.accept = 'image/*';
+    input.click();
 }
 
 function uploadBackground() {
     uploadType = 'background';
-    fileInput.click();
+    const input = document.getElementById('file-input');
+    input.accept = 'image/*';
+    input.click();
 }
 
 fileInput.addEventListener('change', async (e) => {
