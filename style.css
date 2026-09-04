@@ -509,14 +509,11 @@ body {
 
 .profile-toolbar {
     position: relative;
-    top: auto;
-    right: auto;
     z-index: 50;
     display: flex;
-    gap: 5px;
-    padding: 30px 10px 8px 5px;
+    padding: 0 10px;
     background: transparent;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-shrink: 0;
 }
 
@@ -534,7 +531,7 @@ body {
 
 .options-menu {
     position: absolute;
-    top: 340px;
+    top: 310px;
     right: 10px;
     z-index: 60;
     background: #1a1a1a;
@@ -1018,4 +1015,41 @@ body {
     60% { color: #00bfff; }
     80% { color: #ff00ff; }
     100% { color: #ff0000; }
+}
+
+@keyframes glow-gold {
+    0%, 100% { text-shadow: 0 0 5px #d4af37, 0 0 10px #d4af37; }
+    50% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700; }
+}
+
+@keyframes glow-white {
+    0%, 100% { text-shadow: 0 0 5px #fff, 0 0 10px #fff; }
+    50% { text-shadow: 0 0 20px #fff, 0 0 30px #fff; }
+}
+
+@keyframes glow-blue {
+    0%, 100% { text-shadow: 0 0 5px #0abde3, 0 0 10px #0abde3; }
+    50% { text-shadow: 0 0 20px #0abde3, 0 0 30px #0abde3; }
+}
+
+@keyframes glow-red {
+    0%, 100% { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
+    50% { text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000; }
+}
+
+@keyframes glow-green {
+    0%, 100% { text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; }
+    50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+}
+
+@keyframes glow-purple {
+    0%, 100% { text-shadow: 0 0 5px #9b59b6, 0 0 10px #9b59b6; }
+    50% { text-shadow: 0 0 20px #9b59b6, 0 0 30px #9b59b6; }
+}
+
+@keyframes glow-rainbow {
+    0%, 100% { text-shadow: 0 0 10px #ff0000; }
+    25% { text-shadow: 0 0 10px #ffd700; }
+    50% { text-shadow: 0 0 10px #00ff00; }
+    75% { text-shadow: 0 0 10px #00bfff; }
 }
