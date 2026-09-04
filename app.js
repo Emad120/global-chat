@@ -85,7 +85,6 @@ const frames = [
     { value: 'purple', label: 'إطار بنفسجي متوهج' }
 ];
 
-// سيرفرات PeerJS المتعددة
 const PEER_SERVERS = [
     { host: '0.peerjs.com', port: 443, secure: true, path: '/' },
     { host: 'peerjs.vercel.app', port: 443, secure: true, path: '/' },
@@ -993,6 +992,31 @@ function connectToPeer(remotePeerId) {
     }
 }
 
+function connectAllMics() {
+    if (!peer || !myStream) {
+        alert('انضم للمايك أولاً!');
+        return;
+    }
+    
+    db.collection('mics').get().then((snapshot) => {
+        let connected = 0;
+        
+        snapshot.forEach((doc) => {
+            const micData = doc.data();
+            if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
+                connectToPeer(micData.peerId);
+                connected++;
+            }
+        });
+        
+        if (connected > 0) {
+            alert('تم الاتصال بـ ' + connected + ' مستخدم');
+        } else {
+            alert('لا يوجد مستخدمين آخرين');
+        }
+    });
+}
+
 function listenForMics() {
     db.collection('mics').orderBy('micNumber').onSnapshot((snapshot) => {
         for (let i = 1; i <= 4; i++) {
@@ -1007,12 +1031,6 @@ function listenForMics() {
             if (micEl) {
                 micEl.classList.add('taken');
                 micEl.textContent = micData.username.charAt(0);
-            }
-            
-            if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
-                setTimeout(() => {
-                    connectToPeer(micData.peerId);
-                }, 2000);
             }
         });
     });
