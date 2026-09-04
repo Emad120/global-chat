@@ -126,6 +126,10 @@
         <div class="profile-box">
             <button class="btn-close" onclick="closeProfile()">✕</button>
             
+            <div class="profile-cover" id="profile-cover">
+                <img id="cover-img" style="display:none" alt="الغلاف">
+            </div>
+            
             <div class="profile-toolbar">
                 <button class="toolbar-btn" onclick="toggleOptionsMenu()">⚙️ خيارات</button>
             </div>
@@ -136,10 +140,6 @@
                 <button class="option-item" onclick="openSizeDialog()">📏 حجم الاسم</button>
                 <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
                 <button class="option-item" onclick="openEffectDialog()">✨ Gif الاسم</button>
-            </div>
-            
-            <div class="profile-cover" id="profile-cover">
-                <img id="cover-img" style="display:none" alt="الغلاف">
             </div>
             
             <div class="cover-buttons">
@@ -253,6 +253,7 @@
                 <option value="rainbow">قوس قزح</option>
                 <option value="shake">اهتزاز</option>
                 <option value="float">طفو</option>
+                <option value="border-glow">إطار متوهج</option>
             </select>
             <input type="range" id="effect-intensity" min="1" max="10" value="5">
             <span id="intensity-value">5</span>
