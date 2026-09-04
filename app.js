@@ -325,7 +325,6 @@ function openProfile() {
     
     document.getElementById('profile-name').textContent = currentUserData.username;
     document.getElementById('profile-name').contentEditable = false;
-    document.getElementById('profile-role').textContent = currentUserData.role || 'Guest';
     document.getElementById('profile-bio').textContent = currentUserData.bio || '';
     document.getElementById('profile-bio').contentEditable = false;
     
