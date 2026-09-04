@@ -34,14 +34,19 @@ let textStyle = {
     size: 22,
     color: '#d4af37',
     bg: 'transparent',
-    border: 'none',
-    bold: false,
-    italic: false,
-    underline: false,
-    shadow: false,
     effect: 'none',
     intensity: 5
 };
+
+const colors = [
+    '#d4af37', '#ffd700', '#fff', '#000', '#ff0000', '#ff6b6b', '#ff9f43', '#feca57',
+    '#48dbfb', '#0abde3', '#10ac84', '#1dd1a1', '#5f27cd', '#341f97', '#e84393',
+    '#fd79a8', '#6c5ce7', '#a29bfe', '#00cec9', '#81ecec', '#fab1a0', '#e17055',
+    '#636e72', '#b2bec3', '#2d3436', '#dfe6e9', '#74b9ff', '#0984e3', '#55efc4',
+    '#00b894', '#ffeaa7', '#fdcb6e', '#e74c3c', '#c0392b', '#8e44ad', '#9b59b6',
+    '#3498db', '#2980b9', '#1abc9c', '#16a085', '#2ecc71', '#27ae60', '#f1c40f',
+    '#f39c12', '#e67e22', '#d35400', '#ecf0f1', '#bdc3c7', '#95a5a6', '#7f8c8d'
+];
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -281,6 +286,9 @@ function addMessageToScreen(msg, id) {
     if (msg.textStyle) {
         const ts = msg.textStyle;
         nameStyle = `font-family:${ts.font};font-size:${ts.size}px;color:${ts.color};`;
+        if (ts.bg && ts.bg !== 'transparent') {
+            nameStyle += `background:${ts.bg};`;
+        }
     }
     
     div.innerHTML = `
@@ -391,7 +399,8 @@ function openProfile() {
 
 function closeProfile() {
     profileOverlay.classList.remove('show');
-    closeTextEditor();
+    closeAllDialogs();
+    closeOptionsMenu();
 }
 
 async function saveProfile() {
@@ -466,72 +475,148 @@ function editBio() {
     }, { once: true });
 }
 
-function openTextEditor() {
-    document.getElementById('text-editor').style.display = 'block';
-    loadTextStyle();
+function toggleOptionsMenu() {
+    const menu = document.getElementById('options-menu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'flex';
+    } else {
+        menu.style.display = 'none';
+    }
 }
 
-function closeTextEditor() {
-    document.getElementById('text-editor').style.display = 'none';
+function closeOptionsMenu() {
+    document.getElementById('options-menu').style.display = 'none';
 }
 
-function loadTextStyle() {
+function openColorDialog() {
+    closeOptionsMenu();
+    const dialog = document.getElementById('color-dialog');
+    const grid = document.getElementById('color-grid');
+    grid.innerHTML = '';
+    
+    colors.forEach(color => {
+        const div = document.createElement('div');
+        div.className = 'color-item';
+        div.style.background = color;
+        div.onclick = function() {
+            textStyle.color = color;
+            grid.querySelectorAll('.color-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            applyStyleToName();
+        };
+        grid.appendChild(div);
+    });
+    
+    dialog.style.display = 'block';
+}
+
+function closeColorDialog() {
+    document.getElementById('color-dialog').style.display = 'none';
+}
+
+function openBgDialog() {
+    closeOptionsMenu();
+    const dialog = document.getElementById('bg-dialog');
+    const grid = document.getElementById('bg-color-grid');
+    grid.innerHTML = '';
+    
+    colors.forEach(color => {
+        const div = document.createElement('div');
+        div.className = 'color-item';
+        div.style.background = color;
+        div.onclick = function() {
+            textStyle.bg = color;
+            grid.querySelectorAll('.color-item').forEach(el => el.classList.remove('selected'));
+            div.classList.add('selected');
+            applyStyleToName();
+        };
+        grid.appendChild(div);
+    });
+    
+    dialog.style.display = 'block';
+}
+
+function closeBgDialog() {
+    document.getElementById('bg-dialog').style.display = 'none';
+}
+
+function openSizeDialog() {
+    closeOptionsMenu();
+    document.getElementById('size-dialog').style.display = 'block';
+    document.getElementById('size-range').value = textStyle.size;
+    document.getElementById('size-value').textContent = textStyle.size;
+}
+
+function closeSizeDialog() {
+    document.getElementById('size-dialog').style.display = 'none';
+}
+
+function openFontDialog() {
+    closeOptionsMenu();
+    document.getElementById('font-dialog').style.display = 'block';
     document.getElementById('font-select').value = textStyle.font;
-    document.getElementById('font-size').value = textStyle.size;
-    document.getElementById('font-size-value').textContent = textStyle.size;
-    document.getElementById('font-color').value = textStyle.color;
-    document.getElementById('font-bg').value = textStyle.bg === 'transparent' ? '#000000' : textStyle.bg;
-    document.getElementById('border-style').value = textStyle.border;
+}
+
+function closeFontDialog() {
+    document.getElementById('font-dialog').style.display = 'none';
+}
+
+function openEffectDialog() {
+    closeOptionsMenu();
+    document.getElementById('effect-dialog').style.display = 'block';
     document.getElementById('effect-select').value = textStyle.effect;
     document.getElementById('effect-intensity').value = textStyle.intensity;
     document.getElementById('intensity-value').textContent = textStyle.intensity;
-    
-    document.getElementById('bold-btn').classList.toggle('active', textStyle.bold);
-    document.getElementById('italic-btn').classList.toggle('active', textStyle.italic);
-    document.getElementById('underline-btn').classList.toggle('active', textStyle.underline);
-    document.getElementById('shadow-btn').classList.toggle('active', textStyle.shadow);
 }
 
-function toggleBold() {
-    textStyle.bold = !textStyle.bold;
-    document.getElementById('bold-btn').classList.toggle('active', textStyle.bold);
+function closeEffectDialog() {
+    document.getElementById('effect-dialog').style.display = 'none';
+}
+
+function closeAllDialogs() {
+    document.querySelectorAll('.color-dialog, .dialog').forEach(el => el.style.display = 'none');
+}
+
+function applyColor() {
+    closeColorDialog();
+    saveTextStyle();
+}
+
+function applyBgColor() {
+    closeBgDialog();
+    saveTextStyle();
+}
+
+function applySize() {
+    textStyle.size = parseInt(document.getElementById('size-range').value);
+    closeSizeDialog();
     applyStyleToName();
+    saveTextStyle();
 }
 
-function toggleItalic() {
-    textStyle.italic = !textStyle.italic;
-    document.getElementById('italic-btn').classList.toggle('active', textStyle.italic);
-    applyStyleToName();
-}
-
-function toggleUnderline() {
-    textStyle.underline = !textStyle.underline;
-    document.getElementById('underline-btn').classList.toggle('active', textStyle.underline);
-    applyStyleToName();
-}
-
-function toggleShadow() {
-    textStyle.shadow = !textStyle.shadow;
-    document.getElementById('shadow-btn').classList.toggle('active', textStyle.shadow);
-    applyStyleToName();
-}
-
-function applyTextStyle() {
+function applyFont() {
     textStyle.font = document.getElementById('font-select').value;
-    textStyle.color = document.getElementById('font-color').value;
-    textStyle.bg = document.getElementById('font-bg').value;
-    textStyle.border = document.getElementById('border-style').value;
-    textStyle.effect = document.getElementById('effect-select').value;
-    
+    closeFontDialog();
     applyStyleToName();
+    saveTextStyle();
+}
+
+function applyEffect() {
+    textStyle.effect = document.getElementById('effect-select').value;
+    textStyle.intensity = parseInt(document.getElementById('effect-intensity').value);
+    closeEffectDialog();
+    applyStyleToName();
+    saveTextStyle();
+}
+
+function saveTextStyle() {
+    currentUserData.textStyle = textStyle;
     
     if (currentUser && !currentUserData.isGuest) {
         db.collection('users').doc(currentUser).update({
             textStyle: textStyle
         });
     }
-    
-    closeTextEditor();
 }
 
 function applyStyleToName() {
@@ -542,15 +627,9 @@ function applyStyleToName() {
     css += `font-family: ${textStyle.font}, sans-serif;`;
     css += `font-size: ${textStyle.size}px;`;
     css += `color: ${textStyle.color};`;
-    css += textStyle.bg !== '#000000' ? `background: ${textStyle.bg};` : 'background: transparent;';
-    css += textStyle.border !== 'none' ? `border: 2px ${textStyle.border} ${textStyle.color};` : 'border: none;';
-    css += textStyle.bold ? 'font-weight: 900;' : 'font-weight: 400;';
-    css += textStyle.italic ? 'font-style: italic;' : 'font-style: normal;';
-    css += textStyle.underline ? 'text-decoration: underline;' : 'text-decoration: none;';
-    css += textStyle.shadow ? 'text-shadow: 2px 2px 4px rgba(0,0,0,0.5);' : '';
+    css += textStyle.bg && textStyle.bg !== 'transparent' ? `background: ${textStyle.bg};` : 'background: transparent;';
     
     nameEl.style.cssText = css;
-    
     nameEl.style.animation = 'none';
     
     switch(textStyle.effect) {
@@ -563,13 +642,8 @@ function applyStyleToName() {
         case 'pulse':
             nameEl.style.animation = `pulse ${2 / textStyle.intensity}s infinite`;
             break;
-        case 'gradient':
-            nameEl.style.background = `linear-gradient(135deg, ${textStyle.color}, #fff, ${textStyle.color})`;
-            nameEl.style.webkitBackgroundClip = 'text';
-            nameEl.style.webkitTextFillColor = 'transparent';
-            break;
-        case 'border-glow':
-            nameEl.style.boxShadow = `0 0 ${textStyle.intensity * 2}px ${textStyle.color}`;
+        case 'rainbow':
+            nameEl.style.animation = `rainbow ${5 / textStyle.intensity}s infinite`;
             break;
         case 'shake':
             nameEl.style.animation = `shake ${2 / textStyle.intensity}s infinite`;
@@ -577,20 +651,17 @@ function applyStyleToName() {
         case 'float':
             nameEl.style.animation = `float ${3 / textStyle.intensity}s infinite`;
             break;
-        case 'rainbow':
-            nameEl.style.animation = `rainbow ${5 / textStyle.intensity}s infinite`;
-            break;
     }
 }
 
-document.getElementById('font-size').addEventListener('input', function() {
-    textStyle.size = this.value;
-    document.getElementById('font-size-value').textContent = this.value;
+document.getElementById('size-range').addEventListener('input', function() {
+    textStyle.size = parseInt(this.value);
+    document.getElementById('size-value').textContent = this.value;
     applyStyleToName();
 });
 
 document.getElementById('effect-intensity').addEventListener('input', function() {
-    textStyle.intensity = this.value;
+    textStyle.intensity = parseInt(this.value);
     document.getElementById('intensity-value').textContent = this.value;
     applyStyleToName();
 });
@@ -752,4 +823,4 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         sendMessage();
     }
-});
+});ح
