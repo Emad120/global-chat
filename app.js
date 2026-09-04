@@ -734,10 +734,12 @@ function applyStyleToName() {
     const nameEl = document.getElementById('profile-name');
     if (!nameEl) return;
     
+    const smallerSize = Math.round(textStyle.sizeW * 0.7);
+    
     let css = `
         font-family: ${textStyle.font}, sans-serif;
-        font-size: ${textStyle.sizeW}px;
-        line-height: ${textStyle.sizeH}px;
+        font-size: ${smallerSize}px;
+        line-height: ${Math.round(textStyle.sizeH * 0.7)}px;
         color: ${textStyle.color};
         background: transparent;
         border: none;
