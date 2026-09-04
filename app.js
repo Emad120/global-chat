@@ -462,58 +462,74 @@ fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    if (file.size > 1024 * 1024) {
-        alert('الصورة كبيرة! اختر صورة أقل من 1MB');
-        return;
-    }
-    
     if (!currentUser || currentUserData.isGuest) {
         alert('الزوار لا يمكنهم رفع صور');
         return;
     }
     
-    try {
-        const reader = new FileReader();
-        
-        reader.onload = async function(event) {
-            const base64 = event.target.result;
-            
-            if (uploadType === 'cover') {
-                currentUserData.coverUrl = base64;
-                document.getElementById('cover-img').src = base64;
-                document.getElementById('cover-img').style.display = 'block';
-                
-                await db.collection('users').doc(currentUser).update({
-                    coverUrl: base64
-                });
-            } else if (uploadType === 'avatar') {
-                currentUserData.avatarUrl = base64;
-                document.getElementById('avatar-img').src = base64;
-                document.getElementById('avatar-img').style.display = 'block';
-                document.getElementById('avatar-letter').style.display = 'none';
-                
-                await db.collection('users').doc(currentUser).update({
-                    avatarUrl: base64
-                });
-            } else {
-                currentUserData.backgroundUrl = base64;
-                document.getElementById('bg-img').src = base64;
-                document.getElementById('bg-img').style.display = 'block';
-                
-                await db.collection('users').doc(currentUser).update({
-                    backgroundUrl: base64
-                });
-            }
-            
-            alert('تم رفع الصورة!');
-        };
-        
-        reader.readAsDataURL(file);
-        
-    } catch (err) {
-        alert('خطأ: ' + err.message);
-    }
+    const img = new Image();
+    const reader = new FileReader();
     
+    reader.onload = function(event) {
+        img.src = event.target.result;
+    };
+    
+    img.onload = async function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width = img.width;
+        let height = img.height;
+        
+        const maxSize = 800;
+        
+        if (width > maxSize || height > maxSize) {
+            if (width > height) {
+                height = (height / width) * maxSize;
+                width = maxSize;
+            } else {
+                width = (width / height) * maxSize;
+                height = maxSize;
+            }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        
+        if (uploadType === 'cover') {
+            currentUserData.coverUrl = compressedBase64;
+            document.getElementById('cover-img').src = compressedBase64;
+            document.getElementById('cover-img').style.display = 'block';
+            
+            await db.collection('users').doc(currentUser).update({
+                coverUrl: compressedBase64
+            });
+        } else if (uploadType === 'avatar') {
+            currentUserData.avatarUrl = compressedBase64;
+            document.getElementById('avatar-img').src = compressedBase64;
+            document.getElementById('avatar-img').style.display = 'block';
+            document.getElementById('avatar-letter').style.display = 'none';
+            
+            await db.collection('users').doc(currentUser).update({
+                avatarUrl: compressedBase64
+            });
+        } else {
+            currentUserData.backgroundUrl = compressedBase64;
+            document.getElementById('bg-img').src = compressedBase64;
+            document.getElementById('bg-img').style.display = 'block';
+            
+            await db.collection('users').doc(currentUser).update({
+                backgroundUrl: compressedBase64
+            });
+        }
+        
+        alert('تم رفع الصورة!');
+    };
+    
+    reader.readAsDataURL(file);
     e.target.value = '';
 });
 
