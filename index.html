@@ -138,7 +138,7 @@
                 <button class="option-item" onclick="openColorDialog()">🎨 لون الاسم</button>
                 <button class="option-item" onclick="openBgDialog()">🖼️ خلفية الاسم</button>
                 <button class="option-item" onclick="openFontDialog()">✍️ خط الاسم</button>
-                <button class="option-item" onclick="openEffectDialog()">✨ Gif الاسم</button>
+                <button class="option-item" onclick="openEffectDialog()">✨ حركة</button>
                 <button class="option-item" onclick="openFrameDialog()">🔲 إطارات متوهجة</button>
             </div>
             
@@ -230,32 +230,10 @@
     <div class="dialog" id="effect-dialog" style="display:none">
         <div class="dialog-content">
             <div class="dialog-header">
-                <h4>✨ Gif الاسم</h4>
+                <h4>✨ حركة</h4>
                 <button onclick="closeEffectDialog()">✕</button>
             </div>
-            <select id="effect-select">
-                <option value="none">بدون</option>
-                <option value="glow">توهج</option>
-                <option value="blink">وميض</option>
-                <option value="pulse">نبض</option>
-                <option value="rainbow">قوس قزح</option>
-                <option value="shake">اهتزاز</option>
-                <option value="float">طفو</option>
-                <option value="bounce">قفز</option>
-                <option value="swing">تأرجح</option>
-                <option value="wobble">تمايل</option>
-                <option value="zoom">زوم</option>
-                <option value="flip">انعكاس</option>
-                <option value="slide">انزلاق</option>
-                <option value="fade">تلاشي</option>
-                <option value="rotate">دوران</option>
-                <option value="scale">تكبير</option>
-                <option value="glitter">بريق</option>
-                <option value="shining">لمعان</option>
-                <option value="flashing">وميض قوي</option>
-            </select>
-            <input type="range" id="effect-intensity" min="1" max="10" value="5">
-            <span id="intensity-value">5</span>
+            <div class="effect-list" id="effect-list"></div>
             <button class="btn-apply" onclick="applyEffect()">تطبيق</button>
         </div>
     </div>
