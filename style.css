@@ -562,14 +562,41 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 5px;
+    position: relative;
+    width: 100%;
+}
+
+.name-row h2 {
+    display: inline-block;
+}
+
+.name-row .btn-edit {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .bio-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 5px;
+    position: relative;
+    width: 100%;
+}
+
+.bio-row .profile-bio {
+    display: inline-block;
+    max-width: 80%;
+}
+
+.bio-row .btn-edit {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .btn-edit {
