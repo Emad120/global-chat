@@ -904,14 +904,34 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// ============ نظام المايكات ============
-const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
-let agoraClient = null;
-let localAudioTrack = null;
+// ============ نظام المايكات WebRTC ============
+let peer = null;
+let myStream = null;
 let joinedMicNumber = null;
+let activeCalls = {};
 
-function generateToken() {
-    return '007eJxTYHBJPMmddT/glcAK5/Lg39NiGI5NE/uhemq3Bcu7r2v37/JQYEg2MDM0TjU0Mk60TDMxSk1LtEy1sLQ0MzYBCpkYm6Z6K8zOaghkZLjwt5+BEQpBfE6GktTiEt2i/PxcBgYAC5kh7Q==';
+function initPeer() {
+    peer = new Peer();
+    
+    peer.on('open', (id) => {
+        console.log('My Peer ID:', id);
+    });
+    
+    peer.on('call', async (call) => {
+        if (myStream) {
+            call.answer(myStream);
+        } else {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            myStream = stream;
+            call.answer(stream);
+        }
+        
+        call.on('stream', (remoteStream) => {
+            const audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play().catch(() => {});
+        });
+    });
 }
 
 async function joinMic(micNumber) {
@@ -930,13 +950,9 @@ async function joinMic(micNumber) {
     }
     
     try {
-        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        if (!peer) initPeer();
         
-        const token = generateToken();
-        await agoraClient.join(AGORA_APP_ID, 'qamar-chat', token, null);
-        
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await agoraClient.publish([localAudioTrack]);
+        myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
         joinedMicNumber = micNumber;
         
@@ -945,13 +961,6 @@ async function joinMic(micNumber) {
         micEl.textContent = currentUserData.username.charAt(0);
         
         alert('✅ انضممت للمايك ' + micNumber);
-        
-        agoraClient.on('user-published', async (user, mediaType) => {
-            if (mediaType === 'audio') {
-                await agoraClient.subscribe(user, mediaType);
-                user.audioTrack.play();
-            }
-        });
         
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
@@ -962,14 +971,13 @@ async function leaveMic() {
     if (!joinedMicNumber) return;
     
     try {
-        if (localAudioTrack) {
-            localAudioTrack.close();
-            localAudioTrack = null;
+        if (myStream) {
+            myStream.getTracks().forEach(track => track.stop());
+            myStream = null;
         }
-        if (agoraClient) {
-            await agoraClient.leave();
-            agoraClient = null;
-        }
+        
+        Object.values(activeCalls).forEach(call => call.close());
+        activeCalls = {};
         
         const micEl = document.getElementById('mic' + joinedMicNumber);
         micEl.classList.remove('taken');
@@ -981,6 +989,8 @@ async function leaveMic() {
         alert('❌ خطأ: ' + err.message);
     }
 }
+
+initPeer();
 
 document.getElementById('mic1').addEventListener('click', () => joinMic(1));
 document.getElementById('mic2').addEventListener('click', () => joinMic(2));
