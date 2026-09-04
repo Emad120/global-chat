@@ -643,11 +643,15 @@ body {
     gap: 5px;
     position: relative;
     width: 100%;
+    min-height: 40px;
 }
 
 .name-row h2 {
     display: inline-block;
     background: transparent !important;
+    padding: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .name-row .btn-edit {
@@ -665,6 +669,7 @@ body {
     gap: 5px;
     position: relative;
     width: 100%;
+    min-height: 40px;
 }
 
 .bio-row .profile-bio {
@@ -699,12 +704,17 @@ body {
     z-index: 3;
     margin-top: 20px;
     background: transparent;
+    flex-shrink: 0;
+    min-height: 80px;
 }
 
 .profile-info h2 {
     color: #d4af37;
     font-size: 22px;
     background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .profile-bio {
@@ -722,6 +732,7 @@ body {
     background: linear-gradient(90deg, transparent, #d4af37, transparent);
     margin: 5px 15px;
     border-radius: 3px;
+    flex-shrink: 0;
 }
 
 .profile-background {
@@ -838,7 +849,8 @@ body {
 }
 
 .dialog select,
-.dialog input[type="range"] {
+.dialog input[type="range"],
+.dialog input[type="text"] {
     padding: 8px;
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 8px;
@@ -859,6 +871,30 @@ body {
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
     font-size: 14px;
+}
+
+.frame-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.frame-item {
+    padding: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    text-align: center;
+    pointer-events: auto;
+}
+
+.frame-item.selected {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.2);
 }
 
 @keyframes blink {
