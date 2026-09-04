@@ -252,6 +252,11 @@ function enterChat() {
         message: `🌟 ${currentUserData.username} انضم للروم`,
         created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
+    
+    // تشغيل PeerJS بعد الدخول
+    setTimeout(() => {
+        initPeer();
+    }, 1000);
 }
 
 async function sendMessage() {
@@ -911,6 +916,8 @@ let joinedMicNumber = null;
 let activeCalls = {};
 
 function initPeer() {
+    if (peer) return;
+    
     peer = new Peer();
     
     peer.on('open', (id) => {
@@ -990,9 +997,6 @@ async function leaveMic() {
     }
 }
 
-initPeer();
-
 document.getElementById('mic1').addEventListener('click', () => joinMic(1));
 document.getElementById('mic2').addEventListener('click', () => joinMic(2));
-document.getElementById('mic3').addEventListener('click', () => joinMic(3));
-document.getElementById('mic4').addEventListener('click', () => joinMic(4));
+document.getElementById('mic
