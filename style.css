@@ -491,7 +491,7 @@ body {
 .profile-avatar-container {
     display: flex;
     justify-content: center;
-    margin-top: -70px;
+    margin-top: -90px;
     position: relative;
     z-index: 3;
 }
@@ -559,11 +559,11 @@ body {
 }
 
 .profile-info {
-    padding: 5px 15px;
+    padding: 0 15px;
     text-align: center;
     position: relative;
     z-index: 3;
-    margin-top: -20px;
+    margin-top: -30px;
 }
 
 .profile-info h2 {
@@ -619,7 +619,7 @@ body {
 .bg-actions {
     position: absolute;
     top: 10px;
-    right: 10px;
+    left: 10px;
     z-index: 5;
     display: flex;
     gap: 10px;
