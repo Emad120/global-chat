@@ -458,10 +458,10 @@ body {
     z-index: 50;
 }
 
-/* صورة الغلاف - بارتفاع 33% ومطابقة للحد العشري */
+/* صورة الغلاف - تم زيادة الارتفاع ليتطابق مع النمط النموذجي */
 .profile-cover {
     width: 100%;
-    height: 33vh;
+    height: 48vh;
     background: linear-gradient(135deg, #d4af37 0%, #8b6914 100%);
     position: relative;
     flex-shrink: 0;
@@ -537,7 +537,7 @@ body {
     pointer-events: auto;
 }
 
-/* قائمة/زر الخيارات أعلى خلفية البروفايل مباشرة */
+/* قائمة الخيارات منسقة */
 .options-menu {
     position: absolute;
     top: 0;
@@ -570,17 +570,18 @@ body {
     background: rgba(212, 175, 55, 0.2);
 }
 
+/* الأفاتار متوضع بدقة على حدود الغلاف والخلفية السفلية */
 .profile-avatar-container {
     display: flex;
     justify-content: center;
-    margin-top: -50px;
+    margin-top: -60px;
     position: relative;
     z-index: 3;
 }
 
 .profile-avatar {
-    width: 104px;
-    height: 104px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     border: 3px solid #d4af37;
     background: #333;
@@ -735,7 +736,7 @@ body {
     border-radius: 3px;
 }
 
-/* خلفية البروفايل - ملاصقة تماماً للغلاف وبدون أي فواصل سوداء */
+/* خلفية البروفايل السفلية متناسقة وملاصة تماماً */
 .profile-background {
     flex: 1;
     position: relative;
