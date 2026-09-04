@@ -514,27 +514,27 @@ body {
     z-index: 50;
     display: flex;
     gap: 5px;
-    padding: 5px 10px;
+    padding: 8px 10px;
     background: transparent;
     justify-content: flex-start;
     flex-shrink: 0;
 }
 
 .toolbar-btn {
-    padding: 6px 10px;
+    padding: 12px 20px;
     border: none;
     border-radius: 8px;
     background: transparent;
     color: #d4af37;
     cursor: pointer;
     font-family: 'Cairo', sans-serif;
-    font-size: 12px;
+    font-size: 16px;
     pointer-events: auto;
 }
 
 .options-menu {
     position: absolute;
-    top: 310px;
+    top: 330px;
     right: 10px;
     z-index: 60;
     background: #1a1a1a;
