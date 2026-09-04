@@ -978,4 +978,11 @@ async function leaveMic() {
         alert('غادرت المايك');
         joinedMicNumber = null;
     } catch (err) {
-        alert('❌ خط
+        alert('❌ خطأ: ' + err.message);
+    }
+}
+
+document.getElementById('mic1').addEventListener('click', () => joinMic(1));
+document.getElementById('mic2').addEventListener('click', () => joinMic(2));
+document.getElementById('mic3').addEventListener('click', () => joinMic(3));
+document.getElementById('mic4').addEventListener('click', () => joinMic(4));
