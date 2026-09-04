@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ اختبار الصوت - قمر الشام</title>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .test-box {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #d4af37;
+        }
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: #d4af37;
+            color: #000;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            margin: 10px;
+        }
+        button.leave {
+            background: #dc2626;
+            color: #fff;
+        }
+        #status {
+            margin: 15px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h2>🎙️ اختبار الصوت</h2>
+        <p>App ID: b8f3b3e1c00c420f82e6d047b2f9bd88</p>
+        <button id="join-btn" onclick="joinMic()">انضمام للمايك</button>
+        <button id="leave-btn" class="leave" onclick="leaveMic()" style="display:none;">مغادرة</button>
+        <div id="status">جاهز</div>
+    </div>
+
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js"></script>
+    <script>
+        const APP_ID = 'b8f3b3e1c00c420f82e6d047b2f9bd88';
+        let client = null;
+        let localTrack = null;
+
+        async function joinMic() {
+            try {
+                client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+                
+                document.getElementById('status').textContent = 'جاري الاتصال...';
+                
+                await client.join(APP_ID, 'test-room', null, null);
+                
+                localTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                await client.publish([localTrack]);
+                
+                document.getElementById('status').textContent = '✅ متصل!';
+                document.getElementById('join-btn').style.display = 'none';
+                document.getElementById('leave-btn').style.display = 'inline-block';
+                
+                client.on('user-published', async (user, mediaType) => {
+                    if (mediaType === 'audio') {
+                        await client.subscribe(user, mediaType);
+                        user.audioTrack.play();
+                    }
+                });
+                
+                client.on('user-unpublished', (user) => {
+                    document.getElementById('status').textContent = '🔇 مستخدم غادر';
+                });
+                
+            } catch (err) {
+                document.getElementById('status').textContent = '❌ خطأ: ' + err.message;
+            }
+        }
+
+        async function leaveMic() {
+            try {
+                if (localTrack) {
+                    localTrack.close();
+                    localTrack = null;
+                }
+                if (client) {
+                    await client.leave();
+                    client = null;
+                }
+                
+                document.getElementById('status').textContent = 'تم المغادرة';
+                document.getElementById('join-btn').style.display = 'inline-block';
+                document.getElementById('leave-btn').style.display = 'none';
+            } catch (err) {
+                document.getElementById('status').textContent = '❌ خطأ: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
