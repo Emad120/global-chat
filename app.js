@@ -11,7 +11,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// إزالة كلمة السر والبيانات الحساسة من المتصفح لعدم الاختراق
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
 const OWNER_USERNAME = 'Emad';
 
@@ -179,7 +178,6 @@ async function loginUser() {
     }
 }
 
-// تسجيل دخول الزوار المجهول رسمياً بـ Firebase Auth
 async function guestLogin() {
     const username = document.getElementById('guest-username').value.trim();
     const age = document.getElementById('guest-age').value;
@@ -283,7 +281,6 @@ function listenForMessages() {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                     const msgData = change.doc.data();
-                    // تحسين البحث عن تكرار الرسالة بدلاً من اللوب على الكل
                     if (!document.querySelector(`[data-id="${change.doc.id}"]`)) {
                         addMessageToScreen(msgData, change.doc.id);
                     }
@@ -293,15 +290,10 @@ function listenForMessages() {
 }
 
 function getEffectAnimation(effect) {
-    const validEffects = [
-        'glow-gold', 'glow-white', 'glow-blue', 'glow-red', 'glow-green', 'glow-purple', 'glow-rainbow',
-        'blink', 'pulse', 'rainbow', 'shake', 'float', 'bounce', 'swing', 'wobble', 'zoom', 'flip',
-        'slide', 'fade', 'rotate', 'scale', 'glitter', 'shining', 'flashing', 'color-change'
-    ];
+    const validEffects = effects.map(e => e.animation);
     return validEffects.includes(effect) ? effect : 'none';
 }
 
-// حماية آمنة من ثغرة XSS باستخدام DOM Manipulation
 function addMessageToScreen(msg, id) {
     const div = document.createElement('div');
     div.className = 'message';
@@ -345,7 +337,7 @@ function addMessageToScreen(msg, id) {
     
     const textDiv = document.createElement('div');
     textDiv.className = 'text';
-    textDiv.textContent = msg.message; // نستخدم textContent لمنع إدخال أكواد خبيثة
+    textDiv.textContent = msg.message;
     
     const timeDiv = document.createElement('div');
     timeDiv.className = 'time';
@@ -367,16 +359,16 @@ function copyRoomLink() {
 
 function toggleMics() {
     const mics = document.getElementById('mics-bar').querySelector('.mics');
-    mics.style.display = (mics.style.display === 'none') ? 'flex' : 'none';
+    if (mics) mics.style.display = (mics.style.display === 'none') ? 'flex' : 'none';
 }
 
 function toggleMenu(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     openSidebar('left-sidebar');
 }
 
 function toggleRooms(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     openSidebar('right-sidebar');
 }
 
@@ -402,7 +394,7 @@ function showAlert(msg) {
 }
 
 function toggleProfile(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     closeAllSidebars();
     openProfile();
 }
@@ -526,7 +518,7 @@ function editBio() {
 
 function toggleOptionsMenu() {
     const menu = document.getElementById('options-menu');
-    menu.style.display = (menu.style.display === 'none') ? 'flex' : 'none';
+    if (menu) menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
 }
 
 function closeOptionsMenu() {
@@ -616,10 +608,10 @@ function openEffectDialog() {
         
         const preview = document.createElement('div');
         preview.className = 'effect-preview';
-        preview.textContent = currentUserData.username;
+        preview.textContent = currentUserData?.username || 'قمر الشام';
         
         if (effect.animation !== 'none') {
-            preview.style.animation = `${effect.animation} ${3 / textStyle.intensity}s infinite`;
+            preview.style.animation = `${effect.animation} ${3 / (textStyle.intensity || 5)}s infinite`;
         }
         
         div.appendChild(preview);
@@ -706,27 +698,36 @@ function applyStyleToName() {
     
     const anim = getEffectAnimation(textStyle.effect);
     if (anim !== 'none') {
-        nameEl.style.animation = `${anim} ${3 / textStyle.intensity}s infinite`;
+        nameEl.style.animation = `${anim} ${3 / (textStyle.intensity || 5)}s infinite`;
     }
 }
 
-document.getElementById('name-width-range').addEventListener('input', function() {
-    textStyle.sizeW = parseInt(this.value);
-    document.getElementById('name-width-value').textContent = this.value;
-    applyStyleToName();
-});
+const widthRange = document.getElementById('name-width-range');
+if (widthRange) {
+    widthRange.addEventListener('input', function() {
+        textStyle.sizeW = parseInt(this.value);
+        document.getElementById('name-width-value').textContent = this.value;
+        applyStyleToName();
+    });
+}
 
-document.getElementById('name-height-range').addEventListener('input', function() {
-    textStyle.sizeH = parseInt(this.value);
-    document.getElementById('name-height-value').textContent = this.value;
-    applyStyleToName();
-});
+const heightRange = document.getElementById('name-height-range');
+if (heightRange) {
+    heightRange.addEventListener('input', function() {
+        textStyle.sizeH = parseInt(this.value);
+        document.getElementById('name-height-value').textContent = this.value;
+        applyStyleToName();
+    });
+}
 
-document.getElementById('effect-intensity').addEventListener('input', function() {
-    textStyle.intensity = parseInt(this.value);
-    document.getElementById('intensity-value').textContent = this.value;
-    applyStyleToName();
-});
+const intensityRange = document.getElementById('effect-intensity');
+if (intensityRange) {
+    intensityRange.addEventListener('input', function() {
+        textStyle.intensity = parseInt(this.value);
+        document.getElementById('intensity-value').textContent = this.value;
+        applyStyleToName();
+    });
+}
 
 function logout() {
     auth.signOut();
@@ -739,22 +740,15 @@ function logout() {
 
 let uploadType = '';
 
-function triggerUpload(type) {
+function setUploadType(type) {
     uploadType = type;
-    fileInput.value = '';
-    fileInput.accept = 'image/*';
-    fileInput.click();
 }
-
-document.getElementById('cover-upload-btn').addEventListener('click', () => triggerUpload('cover'));
-document.getElementById('avatar-upload-btn').addEventListener('click', () => triggerUpload('avatar'));
-document.getElementById('bg-upload-btn').addEventListener('click', () => triggerUpload('background'));
 
 fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    if (!currentUser || currentUserData.isGuest) {
+    if (!currentUser || currentUserData?.isGuest) {
         alert('الزوار لا يمكنهم رفع صور');
         return;
     }
@@ -769,7 +763,7 @@ fileInput.addEventListener('change', async (e) => {
         
         let width = img.width;
         let height = img.height;
-        const maxSize = 800; // تقليل أبعاد الصورة لتقليل حجم Base64
+        const maxSize = 800;
         
         if (width > maxSize || height > maxSize) {
             if (width > height) {
@@ -785,7 +779,7 @@ fileInput.addEventListener('change', async (e) => {
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة لـ 70%
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
         
         const updateData = {};
         if (uploadType === 'cover') {
@@ -799,7 +793,7 @@ fileInput.addEventListener('change', async (e) => {
             document.getElementById('avatar-img').style.display = 'block';
             document.getElementById('avatar-letter').style.display = 'none';
             updateData.avatarUrl = compressedBase64;
-        } else {
+        } else if (uploadType === 'background') {
             currentUserData.backgroundUrl = compressedBase64;
             document.getElementById('bg-img').src = compressedBase64;
             document.getElementById('bg-img').style.display = 'block';
@@ -817,7 +811,7 @@ fileInput.addEventListener('change', async (e) => {
 async function removeCover() {
     currentUserData.coverUrl = '';
     document.getElementById('cover-img').style.display = 'none';
-    if (currentUser && !currentUserData.isGuest) {
+    if (currentUser && !currentUserData?.isGuest) {
         await db.collection('users').doc(currentUser).update({ coverUrl: '' });
     }
 }
@@ -826,7 +820,7 @@ async function removeAvatar() {
     currentUserData.avatarUrl = '';
     document.getElementById('avatar-img').style.display = 'none';
     document.getElementById('avatar-letter').style.display = 'block';
-    if (currentUser && !currentUserData.isGuest) {
+    if (currentUser && !currentUserData?.isGuest) {
         await db.collection('users').doc(currentUser).update({ avatarUrl: '' });
     }
 }
@@ -834,25 +828,25 @@ async function removeAvatar() {
 async function removeBackground() {
     currentUserData.backgroundUrl = '';
     document.getElementById('bg-img').style.display = 'none';
-    if (currentUser && !currentUserData.isGuest) {
+    if (currentUser && !currentUserData?.isGuest) {
         await db.collection('users').doc(currentUser).update({ backgroundUrl: '' });
     }
 }
 
 function toggleNotifications(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     closeAllSidebars();
     alert('الإشعارات - قريباً');
 }
 
 function togglePrivate(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     closeAllSidebars();
     alert('الرسائل الخاصة - قريباً');
 }
 
 function toggleMemory(event) {
-    event.stopPropagation();
+    if (event) event.stopPropagation();
     closeAllSidebars();
     alert('الذاكرة - قريباً');
 }
