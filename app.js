@@ -86,12 +86,8 @@ const frames = [
 ];
 
 const PEER_SERVERS = [
-    { host: '0.peerjs.com', port: 443, secure: true, path: '/' },
-    { host: 'peerjs.vercel.app', port: 443, secure: true, path: '/' },
-    { host: 'peerjs-server.herokuapp.com', port: 443, secure: true, path: '/' }
+    { host: '0.peerjs.com', port: 443, secure: true, path: '/' }
 ];
-
-let currentServerIndex = 0;
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -917,7 +913,7 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// ============ نظام المايكات WebRTC ============
+// ============ نظام البث الصوتي ============
 let peer = null;
 let myStream = null;
 let joinedMicNumber = null;
@@ -927,9 +923,7 @@ let myPeerId = null;
 function initPeer() {
     if (peer) return;
     
-    const config = PEER_SERVERS[currentServerIndex];
-    
-    peer = new Peer(undefined, config);
+    peer = new Peer(undefined, PEER_SERVERS[0]);
     
     peer.on('open', (id) => {
         myPeerId = id;
@@ -953,6 +947,7 @@ function initPeer() {
             const audio = new Audio();
             audio.srcObject = remoteStream;
             audio.play().catch(() => {});
+            alert('📢 استقبلت بث صوتي!');
         });
         
         activeCalls[call.peer] = call;
@@ -960,16 +955,6 @@ function initPeer() {
     
     peer.on('error', (err) => {
         console.error('PeerJS Error:', err.message);
-        
-        if (err.type === 'network' || err.type === 'server-error' || err.type === 'peer-unavailable') {
-            if (currentServerIndex < PEER_SERVERS.length - 1) {
-                currentServerIndex++;
-                peer.destroy();
-                peer = null;
-                myPeerId = null;
-                initPeer();
-            }
-        }
     });
 }
 
@@ -984,6 +969,7 @@ function connectToPeer(remotePeerId) {
             const audio = new Audio();
             audio.srcObject = remoteStream;
             audio.play().catch(() => {});
+            alert('📢 استقبلت بث صوتي!');
         });
         
         activeCalls[remotePeerId] = call;
@@ -1008,11 +994,10 @@ function listenForMics() {
                 micEl.textContent = micData.username.charAt(0);
             }
             
-            // اتصال تلقائي
             if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
                 setTimeout(() => {
                     connectToPeer(micData.peerId);
-                }, 3000);
+                }, 5000);
             }
         });
     });
@@ -1054,7 +1039,18 @@ async function joinMic(micNumber) {
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        alert('✅ انضممت للمايك ' + micNumber);
+        alert('✅ بدأ البث الصوتي على المايك ' + micNumber);
+        
+        // اتصل بكل المايكات الأخرى
+        setTimeout(async () => {
+            const micsSnapshot = await db.collection('mics').get();
+            micsSnapshot.forEach((doc) => {
+                const micData = doc.data();
+                if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
+                    connectToPeer(micData.peerId);
+                }
+            });
+        }, 5000);
         
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
@@ -1075,7 +1071,7 @@ async function leaveMic() {
         
         await db.collection('mics').doc('mic' + joinedMicNumber).delete();
         
-        alert('غادرت المايك');
+        alert('توقف البث الصوتي');
         joinedMicNumber = null;
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
