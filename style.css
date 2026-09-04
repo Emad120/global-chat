@@ -518,7 +518,7 @@ body {
     position: relative;
     z-index: 50;
     display: flex;
-    padding: 130px 10px 10px 10px;
+    padding: 30px 10px 10px 10px;
     background: transparent;
     justify-content: flex-start;
     flex-shrink: 0;
@@ -538,7 +538,7 @@ body {
 
 .options-menu {
     position: absolute;
-    top: 370px;
+    top: 330px;
     right: 10px;
     z-index: 60;
     background: #1a1a1a;
