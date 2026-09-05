@@ -1,4 +1,4 @@
-// نظام الصوت المستقل
+// ============ نظام الصوت المستقل ============
 const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
 const TOKEN_SERVER_URL = 'https://agora-token.emadhlaweh.workers.dev/qamar-chat';
 
@@ -127,14 +127,15 @@ function listenForMics() {
     });
 }
 
+// ربط الأزرار
 document.getElementById('mic1').addEventListener('click', () => joinMic(1));
 document.getElementById('mic2').addEventListener('click', () => joinMic(2));
 document.getElementById('mic3').addEventListener('click', () => joinMic(3));
 document.getElementById('mic4').addEventListener('click', () => joinMic(4));
 
 // ربط listenForMics مع enterChat
-const originalEnterChat = enterChat;
-enterChat = function() {
-    originalEnterChat();
+const originalEnterChat = window.enterChat;
+window.enterChat = function() {
+    if (originalEnterChat) originalEnterChat();
     listenForMics();
 };
