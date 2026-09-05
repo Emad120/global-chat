@@ -1,22 +1,44 @@
-const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
-const TOKEN_SERVER_URL = 'https://global-chat-1-2pss.onrender.com/token';
-
-let agoraClient = null;
-let localAudioTrack = null;
+let peer = null;
+let myStream = null;
 let joinedMicNumber = null;
+let activeCalls = {};
+let myPeerId = null;
 
-function loadAgoraSDK() {
-    return new Promise((resolve, reject) => {
-        if (window.AgoraRTC) {
-            resolve();
-            return;
+function initPeer() {
+    if (peer) return;
+    
+    peer = new Peer();
+    
+    peer.on('open', (id) => {
+        myPeerId = id;
+        console.log('My Peer ID:', id);
+        
+        if (currentUser) {
+            db.collection('users').doc(currentUser).update({ peerId: id });
+        }
+    });
+    
+    peer.on('call', async (call) => {
+        if (myStream) {
+            call.answer(myStream);
+        } else {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            myStream = stream;
+            call.answer(stream);
         }
         
-        const script = document.createElement('script');
-        script.src = 'https://download.agora.io/sdk/release/AgoraRTC_N-4.22.0.js';
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load Agora SDK'));
-        document.head.appendChild(script);
+        call.on('stream', (remoteStream) => {
+            const audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play().catch(() => {});
+            alert('📢 استقبلت صوت!');
+        });
+        
+        activeCalls[call.peer] = call;
+    });
+    
+    peer.on('error', (err) => {
+        console.error('PeerJS Error:', err.message);
     });
 }
 
@@ -42,17 +64,9 @@ async function joinMic(micNumber) {
     }
     
     try {
-        await loadAgoraSDK();
+        if (!peer) initPeer();
         
-        const response = await fetch(TOKEN_SERVER_URL);
-        const data = await response.json();
-        const token = data.token;
-        
-        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-        await agoraClient.join(AGORA_APP_ID, 'qamar-chat', token, null);
-        
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await agoraClient.publish([localAudioTrack]);
+        myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
         joinedMicNumber = micNumber;
         
@@ -60,6 +74,7 @@ async function joinMic(micNumber) {
             micNumber: micNumber,
             userId: currentUser,
             username: currentUserData.username,
+            peerId: myPeerId || 'pending',
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
@@ -69,15 +84,39 @@ async function joinMic(micNumber) {
         
         alert('✅ انضممت للمايك ' + micNumber);
         
-        agoraClient.on('user-published', async (user, mediaType) => {
-            if (mediaType === 'audio') {
-                await agoraClient.subscribe(user, mediaType);
-                user.audioTrack.play();
-            }
-        });
+        // اتصل بكل المايكات الأخرى
+        setTimeout(async () => {
+            const micsSnapshot = await db.collection('mics').get();
+            micsSnapshot.forEach((doc) => {
+                const micData = doc.data();
+                if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
+                    connectToPeer(micData.peerId);
+                }
+            });
+        }, 3000);
         
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
+    }
+}
+
+function connectToPeer(remotePeerId) {
+    if (!peer || !myStream) return;
+    if (activeCalls[remotePeerId]) return;
+    
+    try {
+        const call = peer.call(remotePeerId, myStream);
+        
+        call.on('stream', (remoteStream) => {
+            const audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play().catch(() => {});
+            alert('📢 استقبلت صوت!');
+        });
+        
+        activeCalls[remotePeerId] = call;
+    } catch (err) {
+        console.error('Call Error:', err);
     }
 }
 
@@ -85,14 +124,13 @@ async function leaveMic() {
     if (!joinedMicNumber) return;
     
     try {
-        if (localAudioTrack) {
-            localAudioTrack.close();
-            localAudioTrack = null;
+        if (myStream) {
+            myStream.getTracks().forEach(track => track.stop());
+            myStream = null;
         }
-        if (agoraClient) {
-            await agoraClient.leave();
-            agoraClient = null;
-        }
+        
+        Object.values(activeCalls).forEach(call => call.close());
+        activeCalls = {};
         
         await db.collection('mics').doc('mic' + joinedMicNumber).delete();
         
@@ -122,6 +160,12 @@ function listenForMics() {
                 micEl.classList.add('taken');
                 micEl.textContent = micData.username.charAt(0);
             }
+            
+            if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
+                setTimeout(() => {
+                    connectToPeer(micData.peerId);
+                }, 3000);
+            }
         });
     });
 }
@@ -130,6 +174,7 @@ const originalEnterChat = window.enterChat;
 window.enterChat = function() {
     if (originalEnterChat) originalEnterChat();
     setTimeout(() => {
+        initPeer();
         listenForMics();
-    }, 1000);
+    }, 2000);
 };
