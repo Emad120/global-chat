@@ -1,5 +1,5 @@
 const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
-const TOKEN_SERVER_URL = 'https://agora-token.emadhlaweh.workers.dev/qamar-chat';
+const TOKEN_SERVER_URL = 'https://global-chat-1-2pss.onrender.com/token';
 
 let agoraClient = null;
 let localAudioTrack = null;
