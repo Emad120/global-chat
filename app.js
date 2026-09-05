@@ -13,9 +13,14 @@ const auth = firebase.auth();
 
 const OWNER_EMAIL = 'emadhlaweh@gmail.com';
 const OWNER_USERNAME = 'Emad';
+const AGORA_APP_ID = 'c0613e123a9f42efa9e899634123435e';
+const TOKEN_SERVER_URL = 'https://agora-token.emadhlaweh.workers.dev/qamar-chat';
 
 let currentUser = null;
 let currentUserData = null;
+let agoraClient = null;
+let localAudioTrack = null;
+let joinedMicNumber = null;
 
 const loginScreen = document.getElementById('login-screen');
 const chatScreen = document.getElementById('chat-screen');
@@ -83,10 +88,6 @@ const frames = [
     { value: 'red', label: 'إطار أحمر متوهج' },
     { value: 'green', label: 'إطار أخضر متوهج' },
     { value: 'purple', label: 'إطار بنفسجي متوهج' }
-];
-
-const PEER_SERVERS = [
-    { host: '0.peerjs.com', port: 443, secure: true, path: '/' }
 ];
 
 function switchTab(tab) {
@@ -257,10 +258,6 @@ function enterChat() {
         message: `🌟 ${currentUserData.username} انضم للروم`,
         created_at: firebase.firestore.FieldValue.serverTimestamp()
     });
-    
-    setTimeout(() => {
-        initPeer();
-    }, 1000);
 }
 
 async function sendMessage() {
@@ -913,71 +910,7 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
-// ============ نظام البث الصوتي ============
-let peer = null;
-let myStream = null;
-let joinedMicNumber = null;
-let activeCalls = {};
-let myPeerId = null;
-
-function initPeer() {
-    if (peer) return;
-    
-    peer = new Peer(undefined, PEER_SERVERS[0]);
-    
-    peer.on('open', (id) => {
-        myPeerId = id;
-        console.log('My Peer ID:', id);
-        
-        if (currentUser) {
-            db.collection('users').doc(currentUser).update({ peerId: id });
-        }
-    });
-    
-    peer.on('call', async (call) => {
-        if (myStream) {
-            call.answer(myStream);
-        } else {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            myStream = stream;
-            call.answer(stream);
-        }
-        
-        call.on('stream', (remoteStream) => {
-            const audio = new Audio();
-            audio.srcObject = remoteStream;
-            audio.play().catch(() => {});
-            alert('📢 استقبلت بث صوتي!');
-        });
-        
-        activeCalls[call.peer] = call;
-    });
-    
-    peer.on('error', (err) => {
-        console.error('PeerJS Error:', err.message);
-    });
-}
-
-function connectToPeer(remotePeerId) {
-    if (!peer || !myStream) return;
-    if (activeCalls[remotePeerId]) return;
-    
-    try {
-        const call = peer.call(remotePeerId, myStream);
-        
-        call.on('stream', (remoteStream) => {
-            const audio = new Audio();
-            audio.srcObject = remoteStream;
-            audio.play().catch(() => {});
-            alert('📢 استقبلت بث صوتي!');
-        });
-        
-        activeCalls[remotePeerId] = call;
-    } catch (err) {
-        console.error('Call Error:', err);
-    }
-}
-
+// ============ نظام المايكات Agora ============
 function listenForMics() {
     db.collection('mics').orderBy('micNumber').onSnapshot((snapshot) => {
         for (let i = 1; i <= 4; i++) {
@@ -992,12 +925,6 @@ function listenForMics() {
             if (micEl) {
                 micEl.classList.add('taken');
                 micEl.textContent = micData.username.charAt(0);
-            }
-            
-            if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
-                setTimeout(() => {
-                    connectToPeer(micData.peerId);
-                }, 5000);
             }
         });
     });
@@ -1025,9 +952,18 @@ async function joinMic(micNumber) {
     }
     
     try {
-        if (!peer) initPeer();
+        // جيب Token
+        const response = await fetch(TOKEN_SERVER_URL);
+        const data = await response.json();
+        const token = data.token;
         
-        myStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // انضم للقناة الصوتية
+        agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+        await agoraClient.join(AGORA_APP_ID, 'qamar-chat', token, null);
+        
+        // شغل المايك
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        await agoraClient.publish([localAudioTrack]);
         
         joinedMicNumber = micNumber;
         
@@ -1035,22 +971,17 @@ async function joinMic(micNumber) {
             micNumber: micNumber,
             userId: currentUser,
             username: currentUserData.username,
-            peerId: myPeerId || 'pending',
             joinedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        alert('✅ بدأ البث الصوتي على المايك ' + micNumber);
+        alert('✅ انضممت للمايك ' + micNumber);
         
-        // اتصل بكل المايكات الأخرى
-        setTimeout(async () => {
-            const micsSnapshot = await db.collection('mics').get();
-            micsSnapshot.forEach((doc) => {
-                const micData = doc.data();
-                if (micData.userId !== currentUser && micData.peerId && micData.peerId !== 'pending') {
-                    connectToPeer(micData.peerId);
-                }
-            });
-        }, 5000);
+        // استقبال البث من الآخرين        agoraClient.on('user-published', async (user, mediaType) => {
+            if (mediaType === 'audio') {
+                await agoraClient.subscribe(user, mediaType);
+                user.audioTrack.play();
+            }
+        });
         
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
@@ -1061,17 +992,18 @@ async function leaveMic() {
     if (!joinedMicNumber) return;
     
     try {
-        if (myStream) {
-            myStream.getTracks().forEach(track => track.stop());
-            myStream = null;
+        if (localAudioTrack) {
+            localAudioTrack.close();
+            localAudioTrack = null;
         }
-        
-        Object.values(activeCalls).forEach(call => call.close());
-        activeCalls = {};
+        if (agoraClient) {
+            await agoraClient.leave();
+            agoraClient = null;
+        }
         
         await db.collection('mics').doc('mic' + joinedMicNumber).delete();
         
-        alert('توقف البث الصوتي');
+        alert('غادرت المايك');
         joinedMicNumber = null;
     } catch (err) {
         alert('❌ خطأ: ' + err.message);
