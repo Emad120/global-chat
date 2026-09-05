@@ -127,15 +127,12 @@ function listenForMics() {
     });
 }
 
-// ربط الأزرار
-document.getElementById('mic1').addEventListener('click', () => joinMic(1));
-document.getElementById('mic2').addEventListener('click', () => joinMic(2));
-document.getElementById('mic3').addEventListener('click', () => joinMic(3));
-document.getElementById('mic4').addEventListener('click', () => joinMic(4));
-
-// ربط listenForMics مع enterChat
-const originalEnterChat = window.enterChat;
-window.enterChat = function() {
-    if (originalEnterChat) originalEnterChat();
+// ربط الأزرار بعد تأخير
+setTimeout(() => {
+    document.getElementById('mic1').addEventListener('click', () => joinMic(1));
+    document.getElementById('mic2').addEventListener('click', () => joinMic(2));
+    document.getElementById('mic3').addEventListener('click', () => joinMic(3));
+    document.getElementById('mic4').addEventListener('click', () => joinMic(4));
+    
     listenForMics();
-};
+}, 2000);
