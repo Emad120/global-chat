@@ -271,9 +271,6 @@
                 <button onclick="closeNameEditDialog()">✕</button>
             </div>
             <input type="text" id="name-edit-input" maxlength="20" placeholder="الاسم...">
-            <label>عرض الخط</label>
-            <input type="range" id="name-width-range" min="10" max="40" value="22">
-            <span id="name-width-value">22</span>
             <button class="btn-apply" onclick="applyNameEdit()">تطبيق</button>
         </div>
     </div>
@@ -311,6 +308,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="app.js"></script>
     <script src="voice.js"></script>
 </body>
